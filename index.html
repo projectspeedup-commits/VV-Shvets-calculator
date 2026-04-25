@@ -2,12 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Калькулятор для менеджера</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @media print {
+            body { background-color: white !important; }
+            .print-hide { display: none !important; }
+            .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+            input, select { background: transparent !important; border: none !important; appearance: none !important; -webkit-appearance: none !important; }
+        }
+    </style>
 </head>
 <body class="bg-[#F5F5F7] antialiased overflow-x-hidden">
     <div id="root"></div>
@@ -34,6 +42,9 @@
         const Briefcase = ({className}) => <IconBase className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></IconBase>;
         const AlertTriangle = ({className}) => <IconBase className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></IconBase>;
         const RotateCcw = ({className}) => <IconBase className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></IconBase>;
+        const Printer = ({className}) => <IconBase className={className}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></IconBase>;
+        const Copy = ({className}) => <IconBase className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></IconBase>;
+        const Check = ({className}) => <IconBase className={className}><polyline points="20 6 9 17 4 12"/></IconBase>;
 
         function generateRoundData(start, end, step, rawSizes) {
             const result = [];
@@ -56,11 +67,11 @@
             { target: 14, raw: 16, coef: 1.306 }, { target: 14.5, raw: 16, coef: 1.218 }, { target: 15, raw: 16, coef: 1.138 }, { target: 15.5, raw: 18, coef: 1.349 },
             { target: 16, raw: 18, coef: 1.266 }, { target: 16.5, raw: 18, coef: 1.190 }, { target: 16.5, raw: 19, coef: 1.326 }, { target: 17, raw: 18, coef: 1.121 },
             { target: 17, raw: 19, coef: 1.249 }, { target: 17.5, raw: 19, coef: 1.179 }, { target: 17.5, raw: 20, coef: 1.306 }, { target: 18, raw: 20, coef: 1.235 },
-            { target: 18.5, raw: 20, coef: 1.169 }, { target: 18, raw: 19, coef: 1.114 }, { target: 19, raw: 22, coef: 1.273 }, { target: 19.5, raw: 22, coef: 1.273 },
-            { target: 19, raw: 20, coef: 1.108 }, { target: 20, raw: 22, coef: 1.210 }, { target: 20.5, raw: 22, coef: 1.152 }, { target: 21, raw: 22, coef: 1.098 },
+            { target: 18.5, raw: 20, coef: 1.169 }, { target: 19, raw: 18, coef: 1.114 }, { target: 19, raw: 22, coef: 1.273 }, { target: 19.5, raw: 22, coef: 1.273 },
+            { target: 20, raw: 19, coef: 1.108 }, { target: 20, raw: 22, coef: 1.210 }, { target: 20.5, raw: 22, coef: 1.152 }, { target: 21, raw: 22, coef: 1.098 },
             { target: 21.5, raw: 24, coef: 1.246 }, { target: 22, raw: 24, coef: 1.190 }, { target: 22.5, raw: 24, coef: 1.138 }, { target: 22.5, raw: 25, coef: 1.235 },
             { target: 23, raw: 24, coef: 1.089 }, { target: 23.5, raw: 25, coef: 1.132 }, { target: 23.5, raw: 26, coef: 1.224 }, { target: 24, raw: 25, coef: 1.085 },
-            { target: 24, raw: 26, coef: 1.174 }, { target: 24.5, raw: 26, coef: 1.126 }, { target: 23, raw: 25, coef: 1.181 }, { target: 25, raw: 26, coef: 1.082 },
+            { target: 24, raw: 26, coef: 1.174 }, { target: 24.5, raw: 26, coef: 1.126 }, { target: 25, raw: 23, coef: 1.181 }, { target: 25, raw: 26, coef: 1.082 },
             { target: 25.5, raw: 28, coef: 1.206 }, { target: 26, raw: 28, coef: 1.160 }, { target: 26.5, raw: 28, coef: 1.116 }, { target: 27, raw: 28, coef: 1.075 },
             { target: 27.5, raw: 30, coef: 1.190 }, { target: 28, raw: 30, coef: 1.148 }, { target: 28.5, raw: 30, coef: 1.108 }, { target: 29, raw: 30, coef: 1.070 },
             { target: 29.5, raw: 32, coef: 1.177 }, { target: 30, raw: 32, coef: 1.138 }, { target: 43, raw: 45, coef: 1.095 }, { target: 43.5, raw: 45, coef: 1.070 },
@@ -95,6 +106,8 @@
             const [rawPrice, setRawPrice] = useState('');
             const [sellPrice, setSellPrice] = useState('');
             const [scrapPrice, setScrapPrice] = useState('');
+            
+            const [isCopied, setIsCopied] = useState(false);
 
             const activeData = profileType === 'round' ? ROUND_DATA : HEX_DATA;
 
@@ -273,13 +286,18 @@
                 const profitPerTon = sPrice - rPrice - netLossesPerTon;
                 const profitTotal = profitPerTon * weight;
                 
+                // Рентабельность
+                const marginPercent = sPrice > 0 ? (profitPerTon / sPrice) * 100 : 0;
+                
                 return {
                 lossesPerTon,
                 scrapRevenuePerTon,
                 netLossesPerTon,
                 profitPerTon, 
                 profitTotal,
+                marginPercent,
                 sellTotal: sPrice * weight,
+                sellTotalVat: sPrice * weight * 1.22,
                 rawTotal: rPrice * weight,
                 lossesTotal: lossesPerTon * weight,
                 scrapRevenueTotal: scrapRevenuePerTon * weight,
@@ -314,12 +332,45 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
+            const handlePrint = () => {
+                window.print();
+            };
+
+            const handleCopy = () => {
+                let text = `Детали расчета (ООО "ЗМК Арсенал")\n`;
+                text += `-----------------------------------\n`;
+                text += `Профиль: ${profileType === 'round' ? 'Круг' : 'Шестигранник'} ${selectedTarget || '?'} мм\n`;
+                text += `Длина (отгрузка): ${orderedLength || '?'} мм\n`;
+                text += `Объем заказа: ${orderWeight || '?'} тонн\n\n`;
+                text += `Сырье к закупке: ${requiredWeight || '?'} тонн (Заготовка ${selectedRaw || '?'} мм)\n`;
+                
+                if (commercialStats) {
+                    text += `\nКоммерция:\n`;
+                    text += `Сумма заказа (без НДС): ${formatCurrency(commercialStats.sellTotal)} руб.\n`;
+                    text += `Сумма заказа (с НДС 22%): ${formatCurrency(commercialStats.sellTotalVat)} руб.\n`;
+                }
+
+                // Кроссбраузерное копирование
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand("copy");
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                } catch (err) {
+                    console.error("Ошибка копирования", err);
+                }
+                document.body.removeChild(textArea);
+            };
+
             return (
                 <div className="min-h-screen py-4 sm:py-8 lg:py-12 px-3 sm:px-6 font-sans text-gray-900">
                 <div className="max-w-[1024px] mx-auto space-y-5 sm:space-y-8">
                     
                     {/* Шапка */}
-                    <header className="bg-white/80 backdrop-blur-xl sticky top-2 sm:top-4 z-50 rounded-[24px] sm:rounded-[28px] px-4 py-3 sm:px-8 sm:py-5 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <header className="bg-white/80 backdrop-blur-xl sticky top-2 sm:top-4 z-50 rounded-[24px] sm:rounded-[28px] px-4 py-3 sm:px-8 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 print-hide">
                         <div className="flex items-center gap-3 sm:gap-4 text-center sm:text-left w-full sm:w-auto justify-center sm:justify-start">
                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-[14px] sm:rounded-[18px] flex items-center justify-center shadow-sm shrink-0">
                             <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -333,20 +384,26 @@
                             </p>
                             </div>
                         </div>
-                        <button 
-                            onClick={handleReset} 
-                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95"
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            Сбросить
-                        </button>
+                        
+                        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
+                            <button onClick={handleCopy} className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 active:scale-95 ${isCopied ? 'bg-green-100 text-green-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'}`}>
+                                {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isCopied ? 'Скопировано' : 'Скопировать'}</span>
+                            </button>
+                            <button onClick={handlePrint} className="flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
+                                <Printer className="w-4 h-4" />
+                            </button>
+                            <button onClick={handleReset} className="flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
+                                <RotateCcw className="w-4 h-4" />
+                            </button>
+                        </div>
                     </header>
 
                     {/* Секция 1: Основные параметры */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 print-shadow-none">
                     
                         {/* iOS Style Segmented Control */}
-                        <div className="bg-[#E3E3E8]/60 p-1 rounded-[14px] flex max-w-sm mx-auto mb-6 sm:mb-10">
+                        <div className="bg-[#E3E3E8]/60 p-1 rounded-[14px] flex max-w-sm mx-auto mb-6 sm:mb-10 print-hide">
                             <button 
                             onClick={() => setProfileType('round')} 
                             className={`flex-1 py-2 px-3 rounded-[10px] flex items-center justify-center gap-2 text-[13px] sm:text-sm font-semibold transition-all duration-200 ${profileType === 'round' ? 'bg-white text-gray-900 shadow-[0_3px_8px_rgba(0,0,0,0.12)]' : 'text-gray-500 hover:text-gray-700'}`}
@@ -373,7 +430,7 @@
                                 <option value="" disabled>Размер...</option>
                                 {targetOptions.map(size => <option key={size} value={size}>{size}</option>)}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </div>
                             </div>
@@ -391,7 +448,7 @@
                                 <option value="" disabled>{selectedTarget ? "Выбор..." : "Ожидание"}</option>
                                 {rawOptions.map(size => <option key={size} value={size}>{size}</option>)}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </div>
                             </div>
@@ -436,15 +493,15 @@
                     </section>
 
                     {/* Секция 2: Раскрой */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8 print-shadow-none">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-500 rounded-full">
+                        <div className="p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
                         <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">Раскрой и остатки</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-6 items-center bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50">
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-6 items-center bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50 print-shadow-none">
                         <div className="space-y-1.5 w-full">
                         <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Длина заготовки</label>
                         <div className="relative">
@@ -466,7 +523,7 @@
                             type="text" inputMode="numeric" value={displayedTargetLength} 
                             onChange={(e) => handleNumericInput(e, (val) => setLengthInput({ value: val, source: 'target' }))}
                             disabled={!selectedTarget}
-                            className="w-full bg-white border border-transparent text-blue-600 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] disabled:bg-transparent" 
+                            className="w-full bg-white border border-transparent text-blue-600 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] disabled:bg-transparent print-shadow-none" 
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">мм</span>
                         </div>
@@ -481,14 +538,14 @@
                         <div className="relative w-full sm:w-1/3 shrink-0">
                         <input 
                             type="text" inputMode="numeric" value={orderedLength} onChange={(e) => handleNumericInput(e, setOrderedLength)} 
-                            className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-14 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all" 
+                            className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-14 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
                         />
                         <span className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-base">мм</span>
                         </div>
                     </div>
 
                     {optimalLengths.length > 0 && Number(displayedTargetLength) > 0 && (
-                        <div className="bg-[#F5F5F7] rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-100 mt-4 sm:mt-6">
+                        <div className="bg-[#F5F5F7] rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-100 mt-4 sm:mt-6 print-hide">
                         <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                             <div className="p-2 bg-white rounded-full shadow-sm shrink-0 hidden sm:block">
                             <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
@@ -537,7 +594,7 @@
                             <div className="flex items-center gap-2 mb-1 sm:mb-1.5">
                                 <h4 className="text-green-800 text-[12px] sm:text-sm font-medium">Деловой остаток</h4>
                                 {piecesPerBar > 0 && (
-                                <span className="text-[10px] sm:text-xs font-semibold bg-green-200/60 text-green-700 px-2 py-0.5 rounded-md">
+                                <span className="text-[10px] sm:text-xs font-semibold bg-green-200/60 text-green-700 px-2 py-0.5 rounded-md print-hide">
                                     после реза {piecesPerBar} шт.
                                 </span>
                                 )}
@@ -591,7 +648,7 @@
                     )}
 
                     {remnantLength && Number(remnantLength) < 0 && (
-                        <div className="p-3 sm:p-5 bg-orange-50 border border-orange-100 rounded-xl sm:rounded-2xl flex items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-0">
+                        <div className="p-3 sm:p-5 bg-orange-50 border border-orange-100 rounded-xl sm:rounded-2xl flex items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-0 print-hide">
                         <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 shrink-0 mt-0.5 sm:mt-0" />
                         <div>
                             <p className="text-[12px] sm:text-sm font-semibold text-orange-900 mb-0.5">Длина превышает вытяжку</p>
@@ -603,9 +660,9 @@
 
                     {/* Секция 3: Итог и Коэффициент */}
                     <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px]">
+                    <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px] print-shadow-none">
                         <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-6">
-                        <div className="p-1.5 sm:p-2 bg-blue-50 text-blue-500 rounded-full">
+                        <div className="p-1.5 sm:p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
                             <Package className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <h3 className="text-[15px] sm:text-lg font-semibold tracking-tight text-gray-900">Сырье к закупке</h3>
@@ -616,9 +673,9 @@
                         </div>
                     </div>
 
-                    <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px]">
+                    <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px] print-shadow-none">
                         <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-6">
-                        <div className="p-1.5 sm:p-2 bg-gray-50 text-gray-500 rounded-full">
+                        <div className="p-1.5 sm:p-2 bg-gray-50 text-gray-500 rounded-full print-hide">
                             <Scale className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <h3 className="text-[15px] sm:text-lg font-semibold tracking-tight text-gray-900">Коэффициент</h3>
@@ -630,38 +687,46 @@
                     </section>
 
                     {/* Секция 4: Коммерческий блок */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8">
+                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8 print-shadow-none">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-50 text-gray-900 rounded-full border border-gray-100">
+                        <div className="p-2 bg-gray-50 text-gray-900 rounded-full border border-gray-100 print-hide">
                         <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">Коммерческий расчет</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50 print-shadow-none">
                         <div className="space-y-1.5">
                         <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Цена продажи за 1 т (без НДС)</label>
                         <div className="relative">
                             <input 
                             type="text" inputMode="decimal" placeholder="55 000" 
                             value={formatInputValue(sellPrice)} onChange={(e) => handleNumericInput(e, setSellPrice)} 
-                            className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl pl-4 sm:pl-5 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-medium outline-none focus:ring-2 focus:ring-blue-500/40 shadow-sm transition-all" 
+                            className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl pl-4 sm:pl-5 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-medium outline-none focus:ring-2 focus:ring-blue-500/40 shadow-sm transition-all print-shadow-none" 
                             />
                             <span className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
                         </div>
                         </div>
                         
                         <div className="space-y-1.5">
-                        <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа</label>
-                        <div className="bg-white border border-transparent rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-12 sm:h-14 flex items-center justify-between shadow-sm">
-                            <span className="text-[15px] sm:text-lg font-semibold text-gray-900">{sellPrice && orderWeight ? formatCurrency(Number(sellPrice) * Number(orderWeight)) : '0,00'}</span>
+                        <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (без НДС)</label>
+                        <div className="bg-white border border-transparent rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-12 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
+                            <span className="text-[15px] sm:text-lg font-semibold text-gray-900">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotal) : '0,00'}</span>
+                            <span className="text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
+                        </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                        <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (с НДС 22%)</label>
+                        <div className="bg-white border border-transparent rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-12 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
+                            <span className="text-[15px] sm:text-lg font-bold text-gray-900">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotalVat) : '0,00'}</span>
                             <span className="text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
                         </div>
                         </div>
                     </div>
 
                     {commercialStats && (
-                        <div className="bg-[#0f172a] text-white p-4 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl space-y-6 sm:space-y-8">
+                        <div className="bg-[#0f172a] text-white p-4 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl space-y-6 sm:space-y-8 print-shadow-none">
                         
                         {/* РАСЧЕТ НА 1 ТОННУ ПРОДУКЦИИ */}
                         <div>
@@ -692,9 +757,14 @@
                                     ({formatCurrency(sellPrice)} − {formatCurrency(rawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{scrapPrice && Number(scrapPrice) > 0 && commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
                                 </div>
                                 </div>
-                                <span className={`font-bold text-xl sm:text-2xl tracking-tight self-start sm:self-auto shrink-0 mt-1 sm:mt-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                                {commercialStats.isPositive ? '+' : ''}{formatCurrency(commercialStats.profitPerTon)} руб.
-                                </span>
+                                <div className="flex items-center gap-3 self-start sm:self-auto mt-1 sm:mt-0">
+                                    <span className={`font-bold text-xl sm:text-2xl tracking-tight shrink-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                                    {commercialStats.isPositive ? '+' : ''}{formatCurrency(commercialStats.profitPerTon)} руб.
+                                    </span>
+                                    <span className={`text-[11px] sm:text-[13px] font-bold px-2 py-1 rounded-lg bg-opacity-20 ${commercialStats.isPositive ? 'bg-[#34d399] text-[#34d399]' : 'bg-[#f87171] text-[#f87171]'}`}>
+                                        {commercialStats.isPositive ? '+' : ''}{commercialStats.marginPercent.toFixed(1)}%
+                                    </span>
+                                </div>
                             </div>
                             </div>
                         </div>
@@ -736,7 +806,7 @@
                         </div>
 
                         {/* Блоки предупреждений и рекомендаций */}
-                        <div className="space-y-3 sm:space-y-4 pt-3 sm:pt-6">
+                        <div className="space-y-3 sm:space-y-4 pt-3 sm:pt-6 print-hide">
                             
                             {/* Рекомендация по ценообразованию */}
                             {commercialStats.netLossesPerTon > 0 && (
@@ -766,7 +836,7 @@
                                 <div>
                                 <h5 className="text-[#fca5a5] font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Низкая маржинальность!</h5>
                                 <p className="text-[#fecaca]/80 text-[11px] sm:text-[13px] leading-relaxed">
-                                    Прибыль составляет менее 10 000 руб. на 1 тонну (текущая: {formatCurrency(commercialStats.profitPerTon)} руб.). Рекомендуется повысить цену или оптимизировать длину раскроя.
+                                    Прибыль составляет менее 10 000 руб. на 1 тонну (текущая: {formatCurrency(commercialStats.profitPerTon)} руб., это {commercialStats.marginPercent.toFixed(1)}%). Рекомендуется повысить цену или оптимизировать длину раскроя.
                                 </p>
                                 </div>
                             </div>
