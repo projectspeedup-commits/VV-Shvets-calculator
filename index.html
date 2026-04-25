@@ -1340,6 +1340,136 @@
             );
         }
 
+        // --- ТОЧКА ВХОДА С МАРШРУТИЗАЦИЕЙ И FIREBASE ---
+        function App() {
+            const [view, setView] = useState('login');
+            const [user, setUser] = useState(null);
+            
+            // Глобальные стейты цен
+            const [globalRawPrices, setGlobalRawPrices] = useState(DEFAULT_RAW_PRICES);
+            const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
+
+            // 1. Инициализация анонимной сессии
+            useEffect(() => {
+                if (!auth) {
+                    // Фоллбэк: если облака нет, впускаем сразу без Firebase
+                    setUser({ uid: 'local-user' });
+                    return;
+                }
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+                const unsubscribe = onAuthStateChanged(auth, setUser);
+                return () => unsubscribe();
+            }, []);
+
+            // 2. Слушаем цены из облака ИЛИ памяти браузера
+            useEffect(() => {
+                if (!user) return;
+
+                // Всегда сначала загружаем из локальной памяти браузера (чтобы интерфейс грузился моментально без задержек)
+                try {
+                    const savedRaw = window.localStorage.getItem('arsenal_raw_prices');
+                    const savedScrap = window.localStorage.getItem('arsenal_scrap_price');
+                    if (savedRaw) {
+                        const parsed = JSON.parse(savedRaw);
+                        const loadedPrices = { ...DEFAULT_RAW_PRICES };
+                        STEEL_GRADES.forEach(grade => {
+                            if (parsed[grade] !== undefined) loadedPrices[grade] = parsed[grade];
+                        });
+                        setGlobalRawPrices(loadedPrices);
+                    }
+                    if (savedScrap) setGlobalScrapPrice(savedScrap);
+                } catch(e) {}
+
+                // Затем пытаемся загрузить актуальные данные из облака
+                if (db && appId) {
+                    const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
+                    const unsubscribe = onSnapshot(pricesDocRef, { includeMetadataChanges: true }, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            if (data.rawPrices) {
+                                const loadedPrices = { ...DEFAULT_RAW_PRICES };
+                                STEEL_GRADES.forEach(grade => {
+                                    const dbKey = sanitizeKey(grade);
+                                    if (data.rawPrices[dbKey] !== undefined) {
+                                        loadedPrices[grade] = data.rawPrices[dbKey];
+                                    }
+                                });
+                                setGlobalRawPrices(loadedPrices);
+                                // Синхронизируем с локальной памятью браузера
+                                window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(loadedPrices));
+                            }
+                            if (data.scrapPrice !== undefined) {
+                                setGlobalScrapPrice(data.scrapPrice);
+                                window.localStorage.setItem('arsenal_scrap_price', data.scrapPrice);
+                            }
+                        }
+                    }, (error) => {
+                        console.error("Ошибка чтения из облака:", error);
+                    });
+                    return () => unsubscribe();
+                }
+            }, [user]);
+
+            // 3. Сохранение цен
+            const handleSaveGlobal = async (rawPricesObj, scrapStr) => {
+                setGlobalRawPrices(rawPricesObj);
+                setGlobalScrapPrice(scrapStr);
+                
+                // Всегда сохраняем в локальную память для отказоустойчивости
+                try {
+                    window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(rawPricesObj));
+                    window.localStorage.setItem('arsenal_scrap_price', scrapStr);
+                } catch(e) {}
+
+                if (db && user && appId) {
+                    const firestoreRawPrices = {};
+                    for (const [k, v] of Object.entries(rawPricesObj)) {
+                        firestoreRawPrices[sanitizeKey(k)] = v;
+                    }
+                    const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
+                    await setDoc(pricesDocRef, { rawPrices: firestoreRawPrices, scrapPrice: scrapStr }, { merge: true });
+                }
+            };
+
+            if (view === 'login') {
+                return (
+                    <LoginScreen 
+                        onManagerLogin={() => setView('manager')} 
+                        onAdminLogin={() => setView('admin')} 
+                        isCloudActive={!!db}
+                    />
+                );
+            }
+
+            if (view === 'admin') {
+                return (
+                    <AdminPanel 
+                        initialRawPrices={globalRawPrices} 
+                        initialScrap={globalScrapPrice} 
+                        onSave={handleSaveGlobal} 
+                        onLogout={() => setView('login')} 
+                        isCloudActive={!!db}
+                    />
+                );
+            }
+
+            return (
+                <CalculatorApp 
+                    adminRawPrices={globalRawPrices} 
+                    adminScrapPrice={globalScrapPrice} 
+                    onLogout={() => setView('login')} 
+                    isCloudActive={!!db}
+                />
+            );
+        }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
