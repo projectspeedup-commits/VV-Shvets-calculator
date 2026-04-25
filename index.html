@@ -23,19 +23,44 @@
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, initializeFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ========================================================================
+        // НАСТРОЙКИ ОБЛАКА (ДЛЯ GITHUB PAGES)
+        // Ваши ключи успешно добавлены и правильно отформатированы!
+        // ========================================================================
+        const GITHUB_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAB4ElNeTesYmSSZwBKKiOhmKoX0jxkd6Y",
+            authDomain: "zmk-arsenal-calc.firebaseapp.com",
+            projectId: "zmk-arsenal-calc",
+            storageBucket: "zmk-arsenal-calc.firebasestorage.app",
+            messagingSenderId: "277666739262",
+            appId: "1:277666739262:web:31c72113e8ad2af4234d6f"
+        };
 
         const { useState, useEffect, useMemo } = React;
 
         // --- ИНИЦИАЛИЗАЦИЯ FIREBASE ---
         let app, auth, db, appId;
         try {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            if (firebaseConfig) {
-                app = initializeApp(firebaseConfig);
+            const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            let finalConfig = envConfig;
+            
+            // Если ключи заполнены вручную для GitHub
+            if (!finalConfig && GITHUB_FIREBASE_CONFIG && GITHUB_FIREBASE_CONFIG.apiKey) {
+                finalConfig = GITHUB_FIREBASE_CONFIG;
+            }
+            
+            if (finalConfig) {
+                app = initializeApp(finalConfig);
                 auth = getAuth(app);
-                db = getFirestore(app);
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                // Включаем long polling для обхода блокировок веб-сокетов
+                try {
+                    db = initializeFirestore(app, { experimentalForceLongPolling: true });
+                } catch (e) {
+                    db = getFirestore(app);
+                }
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'github-arsenal-app';
             }
         } catch(e) { 
             console.error("Ошибка инициализации облака:", e); 
@@ -102,6 +127,8 @@
         ];
 
         const DEFAULT_RAW_PRICES = STEEL_GRADES.reduce((acc, grade) => ({...acc, [grade]: ''}), {});
+        
+        // Для безопасного сохранения в Firebase (запрещает точки в ключах)
         const sanitizeKey = (key) => key.replace(/\./g, '_');
 
         function generateRoundData(start, end, step, rawSizes) {
@@ -173,7 +200,7 @@
         };
 
         // --- ЭКРАН ВХОДА ---
-        function LoginScreen({ onManagerLogin, onAdminLogin }) {
+        function LoginScreen({ onManagerLogin, onAdminLogin, isCloudActive }) {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
             const [error, setError] = useState(false);
@@ -208,7 +235,10 @@
                                 <h2 className="text-lg font-bold">Вход для менеджеров</h2>
                             </div>
                             <p className="text-[13px] sm:text-sm text-gray-500 mb-5 leading-relaxed">
-                                Свободный доступ к калькулятору для расчета заказов. Цены на сырье автоматически загружаются из облака.
+                                Свободный доступ к калькулятору для расчета заказов. 
+                                {isCloudActive 
+                                    ? ' Цены на сырье автоматически загружаются из облака.' 
+                                    : ' Цены синхронизированы локально.'}
                             </p>
                             <button 
                                 onClick={onManagerLogin} 
@@ -257,7 +287,7 @@
                                     type="submit" 
                                     className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white rounded-2xl h-12 text-[14px] sm:text-[15px] font-bold shadow-md transition-all focus:outline-none focus:ring-4 focus:ring-gray-500/30 active:scale-[0.98]"
                                 >
-                                    Управление ценами (Облако)
+                                    Управление ценами
                                 </button>
                             </form>
                         </div>
@@ -267,7 +297,7 @@
         }
 
         // --- ПАНЕЛЬ АДМИНИСТРАТОРА ---
-        function AdminPanel({ initialRawPrices, initialScrap, onSave, onLogout }) {
+        function AdminPanel({ initialRawPrices, initialScrap, onSave, onLogout, isCloudActive }) {
             const [rawPrices, setRawPrices] = useState(initialRawPrices);
             const [scrap, setScrap] = useState(initialScrap);
             const [saved, setSaved] = useState(false);
@@ -294,7 +324,7 @@
                     setSaved(true);
                     setTimeout(() => setSaved(false), 3000);
                 } catch (e) {
-                    console.error("Ошибка сохранения в облако:", e);
+                    console.error("Ошибка сохранения:", e);
                     setSaveError("Ошибка сохранения. Проверьте подключение.");
                 }
                 setIsSaving(false);
@@ -310,9 +340,13 @@
                             <div className="w-16 h-16 bg-blue-50 rounded-[20px] flex items-center justify-center shadow-sm border border-blue-100 mb-4">
                                 <Cloud className="w-8 h-8 text-blue-500" />
                             </div>
-                            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 text-center">Облачные цены</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 text-center">
+                                {isCloudActive ? 'Облачные цены' : 'Локальные цены'}
+                            </h2>
                             <p className="text-xs sm:text-sm text-gray-500 mt-1.5 text-center px-4 max-w-sm">
-                                Установленные здесь цены мгновенно синхронизируются со всеми менеджерами.
+                                {isCloudActive 
+                                    ? 'Установленные здесь цены мгновенно синхронизируются со всеми менеджерами.'
+                                    : 'Внимание: Облако не настроено. Цены сохраняются локально только в этом браузере.'}
                             </p>
                         </div>
 
@@ -358,7 +392,7 @@
                                     disabled={isSaving}
                                     className={`w-full flex justify-center items-center gap-2 text-white rounded-2xl h-14 text-[15px] font-bold shadow-md transition-all focus:outline-none active:scale-[0.98] ${saved ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'} ${isSaving ? 'opacity-70 pointer-events-none' : ''}`}
                                 >
-                                    {isSaving ? 'Синхронизация...' : (saved ? '✓ Сохранено в облаке' : 'Сохранить и применить')}
+                                    {isSaving ? 'Сохранение...' : (saved ? '✓ Успешно сохранено' : 'Сохранить и применить')}
                                 </button>
                                 
                                 <button 
@@ -376,7 +410,7 @@
         }
 
         // --- ГЛАВНЫЙ КАЛЬКУЛЯТОР ---
-        function CalculatorApp({ adminRawPrices, adminScrapPrice, onLogout }) {
+        function CalculatorApp({ adminRawPrices, adminScrapPrice, onLogout, isCloudActive }) {
             const [profileType, setProfileType] = useState('round');
             const [steelGrade, setSteelGrade] = useState('');
             const [selectedTarget, setSelectedTarget] = useState('');
@@ -845,7 +879,7 @@
                             </div>
 
                             <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена заготовки за 1 тн (Облако)</label>
+                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена заготовки за 1 тн {isCloudActive ? '(Облако)' : ''}</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -858,7 +892,7 @@
                             </div>
 
                             <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена лома за 1 т (Облако)</label>
+                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена лома за 1 т {isCloudActive ? '(Облако)' : ''}</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -1303,106 +1337,6 @@
 
                 </div>
                 </div>
-            );
-        }
-
-        // --- ТОЧКА ВХОДА С МАРШРУТИЗАЦИЕЙ И FIREBASE ---
-        function App() {
-            const [view, setView] = useState('login');
-            const [user, setUser] = useState(null);
-            
-            // Глобальные стейты цен
-            const [globalRawPrices, setGlobalRawPrices] = useState(DEFAULT_RAW_PRICES);
-            const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
-
-            // 1. Инициализация анонимной сессии (обязательно по правилам Firebase)
-            useEffect(() => {
-                if (!auth) return;
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
-                const unsubscribe = onAuthStateChanged(auth, setUser);
-                return () => unsubscribe();
-            }, []);
-
-            // 2. Слушаем цены из облака в реальном времени
-            useEffect(() => {
-                if (!user || !db || !appId) return;
-
-                const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
-                
-                const unsubscribe = onSnapshot(pricesDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        if (data.rawPrices) {
-                            const loadedPrices = { ...DEFAULT_RAW_PRICES };
-                            STEEL_GRADES.forEach(grade => {
-                                const dbKey = sanitizeKey(grade);
-                                if (data.rawPrices[dbKey] !== undefined) {
-                                    loadedPrices[grade] = data.rawPrices[dbKey];
-                                }
-                            });
-                            setGlobalRawPrices(loadedPrices);
-                        }
-                        if (data.scrapPrice !== undefined) {
-                            setGlobalScrapPrice(data.scrapPrice);
-                        }
-                    }
-                }, (error) => {
-                    console.error("Ошибка чтения из облака:", error);
-                });
-
-                return () => unsubscribe();
-            }, [user]);
-
-            // 3. Сохранение цен в облако (для Админа)
-            const handleSaveGlobal = async (rawPricesObj, scrapStr) => {
-                setGlobalRawPrices(rawPricesObj);
-                setGlobalScrapPrice(scrapStr);
-                
-                if (db && user && appId) {
-                    const firestoreRawPrices = {};
-                    for (const [k, v] of Object.entries(rawPricesObj)) {
-                        firestoreRawPrices[sanitizeKey(k)] = v;
-                    }
-                    
-                    const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
-                    await setDoc(pricesDocRef, { rawPrices: firestoreRawPrices, scrapPrice: scrapStr }, { merge: true });
-                }
-            };
-
-            if (view === 'login') {
-                return (
-                    <LoginScreen 
-                        onManagerLogin={() => setView('manager')} 
-                        onAdminLogin={() => setView('admin')} 
-                    />
-                );
-            }
-
-            if (view === 'admin') {
-                return (
-                    <AdminPanel 
-                        initialRawPrices={globalRawPrices} 
-                        initialScrap={globalScrapPrice} 
-                        onSave={handleSaveGlobal} 
-                        onLogout={() => setView('login')} 
-                    />
-                );
-            }
-
-            return (
-                <CalculatorApp 
-                    adminRawPrices={globalRawPrices} 
-                    adminScrapPrice={globalScrapPrice} 
-                    onLogout={() => setView('login')} 
-                />
             );
         }
 
