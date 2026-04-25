@@ -9,11 +9,43 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
         @media print {
-            body { background-color: white !important; }
+            body { 
+                background-color: white !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                zoom: 0.65; /* Уменьшаем масштаб для Chrome/Edge/Safari/Яндекс */
+            }
+            /* Альтернатива для Firefox */
+            @-moz-document url-prefix() {
+                body {
+                    transform: scale(0.65);
+                    transform-origin: top left;
+                    width: 153%;
+                }
+            }
             .print-hide { display: none !important; }
             .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
             input, select { background: transparent !important; border: none !important; appearance: none !important; -webkit-appearance: none !important; }
+            
+            /* Уплотняем отступы, чтобы всё влезло на 1 страницу */
+            .min-h-screen { 
+                min-height: auto !important; 
+                padding-top: 0 !important; 
+                padding-bottom: 0 !important; 
+            }
+            .space-y-5 > :not([hidden]) ~ :not([hidden]), 
+            .space-y-8 > :not([hidden]) ~ :not([hidden]) { 
+                margin-top: 0.75rem !important; 
+            }
+            section { 
+                padding: 1.25rem !important; 
+                break-inside: avoid !important; 
+            }
         }
     </style>
 </head>
