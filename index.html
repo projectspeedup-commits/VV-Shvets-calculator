@@ -101,6 +101,9 @@
             "ст.20Х", "ст.30Х", "ст.40Х", "ст.А12", "ст.18ХГТ", "ст.25ХГТ", "ст.30ХГСА"
         ];
 
+        const DEFAULT_RAW_PRICES = STEEL_GRADES.reduce((acc, grade) => ({...acc, [grade]: ''}), {});
+        const sanitizeKey = (key) => key.replace(/\./g, '_');
+
         function generateRoundData(start, end, step, rawSizes) {
             const result = [];
             for (let target = start; target <= end; target += step) {
@@ -269,6 +272,7 @@
             const [scrap, setScrap] = useState(initialScrap);
             const [saved, setSaved] = useState(false);
             const [isSaving, setIsSaving] = useState(false);
+            const [saveError, setSaveError] = useState('');
 
             useEffect(() => {
                 setRawPrices(initialRawPrices);
@@ -284,13 +288,14 @@
 
             const handleSave = async () => {
                 setIsSaving(true);
+                setSaveError('');
                 try {
                     await onSave(rawPrices, scrap);
                     setSaved(true);
                     setTimeout(() => setSaved(false), 3000);
                 } catch (e) {
-                    console.error(e);
-                    alert("Ошибка сохранения в облако");
+                    console.error("Ошибка сохранения в облако:", e);
+                    setSaveError("Ошибка сохранения. Проверьте подключение.");
                 }
                 setIsSaving(false);
             };
@@ -347,6 +352,7 @@
                             </div>
 
                             <div className="pt-2 space-y-3 sm:max-w-sm sm:mx-auto">
+                                {saveError && <div className="text-red-500 text-sm font-bold text-center">{saveError}</div>}
                                 <button 
                                     onClick={handleSave} 
                                     disabled={isSaving}
@@ -1306,8 +1312,7 @@
             const [user, setUser] = useState(null);
             
             // Глобальные стейты цен
-            const defaultRawPrices = STEEL_GRADES.reduce((acc, grade) => ({...acc, [grade]: ''}), {});
-            const [globalRawPrices, setGlobalRawPrices] = useState(defaultRawPrices);
+            const [globalRawPrices, setGlobalRawPrices] = useState(DEFAULT_RAW_PRICES);
             const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
 
             // 1. Инициализация анонимной сессии (обязательно по правилам Firebase)
@@ -1334,8 +1339,20 @@
                 const unsubscribe = onSnapshot(pricesDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if (data.rawPrices) setGlobalRawPrices(data.rawPrices);
-                        if (data.scrapPrice) setGlobalScrapPrice(data.scrapPrice);
+                        
+                        if (data.rawPrices) {
+                            const loadedPrices = { ...DEFAULT_RAW_PRICES };
+                            STEEL_GRADES.forEach(grade => {
+                                const dbKey = sanitizeKey(grade);
+                                if (data.rawPrices[dbKey] !== undefined) {
+                                    loadedPrices[grade] = data.rawPrices[dbKey];
+                                }
+                            });
+                            setGlobalRawPrices(loadedPrices);
+                        }
+                        if (data.scrapPrice !== undefined) {
+                            setGlobalScrapPrice(data.scrapPrice);
+                        }
                     }
                 }, (error) => {
                     console.error("Ошибка чтения из облака:", error);
@@ -1350,8 +1367,13 @@
                 setGlobalScrapPrice(scrapStr);
                 
                 if (db && user && appId) {
+                    const firestoreRawPrices = {};
+                    for (const [k, v] of Object.entries(rawPricesObj)) {
+                        firestoreRawPrices[sanitizeKey(k)] = v;
+                    }
+                    
                     const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
-                    await setDoc(pricesDocRef, { rawPrices: rawPricesObj, scrapPrice: scrapStr }, { merge: true });
+                    await setDoc(pricesDocRef, { rawPrices: firestoreRawPrices, scrapPrice: scrapStr }, { merge: true });
                 }
             };
 
