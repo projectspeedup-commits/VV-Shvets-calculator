@@ -9,43 +9,18 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @page {
-            size: A4;
-            margin: 10mm;
-        }
         @media print {
+            @page {
+                size: A4;
+                margin: 15mm;
+            }
             body { 
                 background-color: white !important; 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-                zoom: 0.65; /* Уменьшаем масштаб для Chrome/Edge/Safari/Яндекс */
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
             }
-            /* Альтернатива для Firefox */
-            @-moz-document url-prefix() {
-                body {
-                    transform: scale(0.65);
-                    transform-origin: top left;
-                    width: 153%;
-                }
-            }
+            /* Скрываем весь лишний интерфейс при печати на уровне CSS для надежности */
             .print-hide { display: none !important; }
-            .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
-            input, select { background: transparent !important; border: none !important; appearance: none !important; -webkit-appearance: none !important; }
-            
-            /* Уплотняем отступы, чтобы всё влезло на 1 страницу */
-            .min-h-screen { 
-                min-height: auto !important; 
-                padding-top: 0 !important; 
-                padding-bottom: 0 !important; 
-            }
-            .space-y-5 > :not([hidden]) ~ :not([hidden]), 
-            .space-y-8 > :not([hidden]) ~ :not([hidden]) { 
-                margin-top: 0.75rem !important; 
-            }
-            section { 
-                padding: 1.25rem !important; 
-                break-inside: avoid !important; 
-            }
         }
     </style>
 </head>
@@ -757,18 +732,17 @@
             const handleCopy = () => {
                 let text = `Детали расчета (ООО "ЗМК Арсенал")\n`;
                 text += `-----------------------------------\n`;
-                if (steelGrade) text += `Марка стали: ${steelGrade}\n`;
+                text += `Марка стали: ${steelGrade || 'Не выбрана'}\n`;
                 text += `Профиль: ${profileType === 'round' ? 'Круг' : 'Шестигранник'} ${selectedTarget || '?'} мм\n`;
                 text += `Длина (отгрузка): ${orderedLength || '?'} мм\n`;
                 text += `Объем заказа: ${orderWeight || '?'} тонн\n\n`;
-                if (totalTechCoef > 1) {
-                    text += `Тех. концы: ${techEndsMm} мм (Перед: ${frontCoef}, Зад: ${backCoef})\n`;
-                    text += `Длина после удаления: ${lengthAfterTechEnds} мм\n`;
-                }
-                text += `Сырье к закупке: ${requiredWeight || '?'} тонн (Заготовка ${selectedRaw || '?'} мм)\n`;
+                
+                text += `Тех. концы: ${techEndsMm || '0'} мм (Перед: ${frontCoef}, Зад: ${backCoef})\n`;
+                text += `Длина после удаления: ${lengthAfterTechEnds || '0'} мм\n`;
+                text += `Сырье к закупке: ${requiredWeight || '?'} тонн (Заготовка ${selectedRaw || '?'} мм)\n\n`;
                 
                 if (commercialStats) {
-                    text += `\nКоммерция:\n`;
+                    text += `Коммерция:\n`;
                     text += `Сумма заказа (без НДС): ${formatCurrency(commercialStats.sellTotal)} руб.\n`;
                     text += `Сумма заказа (с НДС 22%): ${formatCurrency(commercialStats.sellTotalVat)} руб.\n`;
                 }
@@ -788,7 +762,92 @@
             };
 
             return (
-                <div className="min-h-screen py-4 sm:py-8 lg:py-12 px-3 sm:px-6 font-sans text-gray-900">
+                <>
+                {/* --- СПЕЦИАЛЬНЫЙ ШАБЛОН ДЛЯ ПЕЧАТИ (КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ) --- */}
+                <div className="hidden print:!block bg-white text-black p-10 font-sans mx-auto" style={{maxWidth: '800px'}}>
+                    
+                    <div className="border-b-4 border-blue-600 pb-6 mb-8 flex justify-between items-end">
+                        <div>
+                            <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">Детали расчета</h1>
+                            <p className="text-xl font-bold text-blue-600 mt-2">ООО "ЗМК Арсенал"</p>
+                        </div>
+                        <div className="text-right text-gray-500 text-sm font-medium">
+                            Дата формирования:<br/>
+                            <span className="text-gray-900 font-bold text-base">{new Date().toLocaleDateString('ru-RU')}</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-12 mb-10">
+                        {/* Параметры заказа */}
+                        <div>
+                            <h2 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-4">Параметры заказа</h2>
+                            <div className="space-y-3">
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Марка стали:</span>
+                                    <span className="font-bold text-gray-900">{steelGrade || 'Не выбрана'}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Профиль:</span>
+                                    <span className="font-bold text-gray-900">{profileType === 'round' ? 'Круг' : 'Шестигранник'} {selectedTarget || '?'} мм</span>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Длина (отгрузка):</span>
+                                    <span className="font-bold text-gray-900">{orderedLength || '?'} мм</span>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Объем заказа:</span>
+                                    <span className="font-bold text-gray-900">{orderWeight || '?'} тонн</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Технологические параметры */}
+                        <div>
+                            <h2 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-4">Технологии & Сырье</h2>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Тех. концы:</span>
+                                    <div className="text-right">
+                                        <span className="font-bold text-gray-900">{techEndsMm || '0.0'} мм</span>
+                                        <div className="text-[10px] text-gray-500 uppercase mt-0.5">Перед: {frontCoef}, Зад: {backCoef}</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600">Длина после удаления:</span>
+                                    <span className="font-bold text-gray-900">{lengthAfterTechEnds || '0.0'} мм</span>
+                                </div>
+                                <div className="flex justify-between border-b border-gray-200 pb-2">
+                                    <span className="text-gray-600 font-bold">Сырье к закупке:</span>
+                                    <span className="font-bold text-blue-600 text-right">{requiredWeight || '?'} тонн <br/><span className="text-xs font-normal text-gray-500">(Заготовка {selectedRaw || '?'} мм)</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Коммерция */}
+                    {commercialStats && (
+                        <div className="bg-gray-50 p-8 rounded-3xl border border-gray-200 mt-6">
+                            <h2 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-6">Коммерческое предложение</h2>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center text-xl">
+                                    <span className="text-gray-600">Сумма заказа (без НДС):</span>
+                                    <span className="font-bold text-gray-900">{formatCurrency(commercialStats.sellTotal)} руб.</span>
+                                </div>
+                                <div className="flex justify-between items-center text-2xl border-t border-gray-300 pt-4 mt-2">
+                                    <span className="font-black text-gray-900">Итого к оплате (с НДС 22%):</span>
+                                    <span className="font-black text-blue-600">{formatCurrency(commercialStats.sellTotalVat)} руб.</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-16 pt-8 border-t border-gray-200 text-center text-gray-400 text-xs">
+                        Документ сгенерирован автоматически информационной системой ООО "ЗМК Арсенал"
+                    </div>
+                </div>
+
+                {/* --- ВЕБ-ИНТЕРФЕЙС КАЛЬКУЛЯТОРА --- */}
+                <div className="min-h-screen py-4 sm:py-8 lg:py-12 px-3 sm:px-6 font-sans text-gray-900 print:!hidden">
                 <div className="max-w-[1024px] mx-auto space-y-5 sm:space-y-8">
                     
                     {/* ШАПКА */}
@@ -1366,9 +1425,9 @@
                             </div>
                         )}
                     </section>
-
                 </div>
                 </div>
+                </>
             );
         }
 
