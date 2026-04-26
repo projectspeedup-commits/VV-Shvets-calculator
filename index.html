@@ -22,6 +22,21 @@
             /* Скрываем весь лишний интерфейс при печати на уровне CSS для надежности */
             .print-hide { display: none !important; }
         }
+        /* Стили для скроллбара таблицы в админке */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
 <body class="bg-[#F5F5F7] antialiased overflow-x-hidden">
@@ -226,7 +241,7 @@
                 <div className="min-h-screen flex items-center justify-center bg-[#F5F5F7] px-4 font-sans text-gray-900 py-12">
                     <div className="flex flex-col gap-6 w-full max-w-md">
                         <div className="flex flex-col items-center mb-2">
-                            <div className="w-16 h-16 bg-blue-50 rounded-[20px] flex items-center justify-center shadow-md mb-4">
+                            <div className="w-16 h-16 bg-blue-500 rounded-[20px] flex items-center justify-center shadow-md mb-4">
                                 <Calculator className="w-8 h-8 text-white" />
                             </div>
                             <h1 className="text-2xl font-bold tracking-tight text-gray-900 text-center">Система расчетов</h1>
@@ -304,11 +319,13 @@
         }
 
         // --- ПАНЕЛЬ АДМИНИСТРАТОРА ---
-        function AdminPanel({ initialRawPrices, initialScrap, initialRemnant, initialCustomGrades, onSave, onLogout, isCloudActive }) {
+        function AdminPanel({ initialRawPrices, initialScrap, initialRemnant, initialCustomGrades, initialRemnantPricing, onSave, onLogout, isCloudActive }) {
             const [rawPrices, setRawPrices] = useState(initialRawPrices);
             const [scrap, setScrap] = useState(initialScrap);
             const [remnant, setRemnant] = useState(initialRemnant);
             const [customGrades, setCustomGrades] = useState(initialCustomGrades || []);
+            const [remnantPricing, setRemnantPricing] = useState(initialRemnantPricing || {});
+            
             const [newGrade, setNewGrade] = useState('');
             const [saved, setSaved] = useState(false);
             const [isSaving, setIsSaving] = useState(false);
@@ -319,7 +336,8 @@
                 setScrap(initialScrap);
                 setRemnant(initialRemnant);
                 setCustomGrades(initialCustomGrades || []);
-            }, [initialRawPrices, initialScrap, initialRemnant, initialCustomGrades]);
+                setRemnantPricing(initialRemnantPricing || {});
+            }, [initialRawPrices, initialScrap, initialRemnant, initialCustomGrades, initialRemnantPricing]);
 
             const allGrades = [...DEFAULT_STEEL_GRADES, ...customGrades];
 
@@ -328,6 +346,16 @@
                 if (val === '' || /^\d*\.?\d*$/.test(val)) {
                     setRawPrices(prev => ({...prev, [grade]: val}));
                 }
+            };
+
+            const handlePricingChange = (grade, profile, value) => {
+                setRemnantPricing(prev => ({
+                    ...prev,
+                    [grade]: {
+                        ...(prev[grade] || { round: 'remnant', hex: 'remnant' }),
+                        [profile]: value
+                    }
+                }));
             };
 
             const handleAddGrade = () => {
@@ -343,13 +371,17 @@
                 const newPrices = {...rawPrices};
                 delete newPrices[gradeToRemove];
                 setRawPrices(newPrices);
+                
+                const newPricing = {...remnantPricing};
+                delete newPricing[gradeToRemove];
+                setRemnantPricing(newPricing);
             };
 
             const handleSave = async () => {
                 setIsSaving(true);
                 setSaveError('');
                 try {
-                    const savePromise = onSave(rawPrices, scrap, remnant, customGrades);
+                    const savePromise = onSave(rawPrices, scrap, remnant, customGrades, remnantPricing);
                     const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("CloudTimeout")), 5000));
                     
                     await Promise.race([savePromise, timeoutPromise]);
@@ -365,8 +397,8 @@
             };
 
             return (
-                <div className="min-h-screen flex items-center justify-center bg-[#F5F5F7] px-4 font-sans text-gray-900 py-12">
-                    <div className="bg-white p-4 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-lg border border-gray-50 w-full max-w-3xl relative overflow-hidden">
+                <div className="min-h-screen flex items-start justify-center bg-[#F5F5F7] px-4 font-sans text-gray-900 py-6 sm:py-12">
+                    <div className="bg-white p-4 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-lg border border-gray-50 w-full max-w-4xl relative overflow-hidden">
                         
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500"></div>
 
@@ -375,12 +407,12 @@
                                 <Cloud className="w-7 h-7 sm:w-8 sm:h-8 text-blue-500" />
                             </div>
                             <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 text-center">
-                                {isCloudActive ? 'Облачные цены' : 'Локальные цены'}
+                                {isCloudActive ? 'Облачные настройки' : 'Локальные настройки'}
                             </h2>
                             <p className="text-[11px] sm:text-sm text-gray-500 mt-1.5 text-center px-2 max-w-sm leading-relaxed">
                                 {isCloudActive 
-                                    ? 'Установленные здесь цены мгновенно синхронизируются со всеми менеджерами.'
-                                    : 'Внимание: Облако не настроено. Цены сохраняются локально только в этом браузере.'}
+                                    ? 'Установленные здесь цены и правила мгновенно синхронизируются со всеми менеджерами.'
+                                    : 'Внимание: Облако не настроено. Настройки сохраняются локально только в этом браузере.'}
                             </p>
                         </div>
 
@@ -388,7 +420,7 @@
                             
                             {/* Управление марками стали */}
                             <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
-                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-3 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Добавление марки стали</h3>
+                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-3 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Добавление новой марки стали</h3>
                                 <div className="flex gap-2 max-w-sm mx-auto sm:mx-0">
                                     <input 
                                         type="text" 
@@ -409,34 +441,73 @@
                                 </div>
                             </div>
 
-                            {/* Блок цен на заготовку */}
-                            <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
-                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-3 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Цена заготовки по маркам стали (руб/тн)</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-                                    {allGrades.map(grade => {
-                                        const isCustom = customGrades.includes(grade);
-                                        return (
-                                        <div key={grade} className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between group">
-                                            <label className="text-[11px] sm:text-[12px] font-medium text-gray-600 shrink-0 ml-1">{grade}</label>
-                                            <div className="flex items-center gap-1.5">
-                                                <input 
-                                                    type="text" inputMode="decimal" placeholder="Цена..."
-                                                    value={formatInputValue(rawPrices[grade] || '')} 
-                                                    onChange={(e) => handlePriceChange(grade, e.target.value)} 
-                                                    className="w-20 bg-transparent border-none text-gray-900 h-8 text-[13px] sm:text-[14px] font-bold sm:font-semibold outline-none text-right placeholder-gray-300" 
-                                                />
-                                                {isCustom && (
-                                                    <button 
-                                                        onClick={() => handleRemoveGrade(grade)}
-                                                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                                                        title="Удалить марку"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )})}
+                            {/* Блок цен и правил на заготовку */}
+                            <div className="bg-[#F5F5F7]/80 pt-4 pb-0 rounded-2xl border border-gray-100/50 overflow-hidden flex flex-col">
+                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-2 px-4 sm:px-6 uppercase tracking-wider">Управление ценами и политикой остатков</h3>
+                                
+                                <div className="overflow-x-auto custom-scrollbar w-full pb-4 px-4 sm:px-6">
+                                    <table className="w-full text-left text-sm whitespace-nowrap mt-2 border-separate" style={{borderSpacing: '0 8px'}}>
+                                        <thead className="text-gray-400 uppercase text-[10px] sm:text-xs">
+                                            <tr>
+                                                <th className="px-2 py-2 font-semibold tracking-wider">Марка</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-right">Цена заготовки (руб/тн)</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Остаток (Круг)</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Остаток (Шестигр.)</th>
+                                                <th className="px-2 py-2 w-8"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {allGrades.map(grade => {
+                                                const isCustom = customGrades.includes(grade);
+                                                const pricing = remnantPricing[grade] || { round: 'remnant', hex: 'remnant' };
+                                                
+                                                return (
+                                                    <tr key={grade} className="bg-white shadow-sm border border-gray-100 transition-colors hover:shadow-md group">
+                                                        <td className="px-3 py-2 font-bold text-gray-700 text-[12px] sm:text-[14px] rounded-l-xl border-y border-l border-gray-100 group-hover:border-blue-100">{grade}</td>
+                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100">
+                                                            <input 
+                                                                type="text" inputMode="decimal" placeholder="Цена..."
+                                                                value={formatInputValue(rawPrices[grade] || '')} 
+                                                                onChange={(e) => handlePriceChange(grade, e.target.value)} 
+                                                                className="w-full sm:w-28 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-2 h-9 text-[13px] font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-right placeholder-gray-300 ml-auto block" 
+                                                            />
+                                                        </td>
+                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
+                                                            <select 
+                                                                value={pricing.round} 
+                                                                onChange={(e) => handlePricingChange(grade, 'round', e.target.value)}
+                                                                className={`bg-gray-50 border text-gray-700 rounded-lg px-2 h-9 text-[11px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full max-w-[140px] mx-auto ${pricing.round === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
+                                                            >
+                                                                <option value="remnant">Деловой остаток</option>
+                                                                <option value="scrap">По цене лома</option>
+                                                            </select>
+                                                        </td>
+                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
+                                                            <select 
+                                                                value={pricing.hex} 
+                                                                onChange={(e) => handlePricingChange(grade, 'hex', e.target.value)}
+                                                                className={`bg-gray-50 border text-gray-700 rounded-lg px-2 h-9 text-[11px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full max-w-[140px] mx-auto ${pricing.hex === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
+                                                            >
+                                                                <option value="remnant">Деловой остаток</option>
+                                                                <option value="scrap">По цене лома</option>
+                                                            </select>
+                                                        </td>
+                                                        <td className="px-2 py-2 rounded-r-xl border-y border-r border-gray-100 group-hover:border-blue-100 text-center align-middle">
+                                                            {isCustom ? (
+                                                                <button 
+                                                                    onClick={() => handleRemoveGrade(grade)}
+                                                                    className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1.5 flex items-center justify-center mx-auto"
+                                                                    title="Удалить марку"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            ) : <div className="w-7"></div>}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
@@ -455,7 +526,7 @@
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена остатка (руб/тн)</label>
+                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена делового остатка (руб/тн)</label>
                                         <div className="relative shadow-sm">
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Например: 35000"
@@ -493,7 +564,7 @@
         }
 
         // --- ГЛАВНЫЙ КАЛЬКУЛЯТОР ---
-        function CalculatorApp({ adminRawPrices, adminScrapPrice, adminRemnantPrice, customGrades, onLogout, isCloudActive }) {
+        function CalculatorApp({ adminRawPrices, adminScrapPrice, adminRemnantPrice, customGrades, remnantPricing, onLogout, isCloudActive }) {
             const [profileType, setProfileType] = useState('round');
             const [steelGrade, setSteelGrade] = useState('');
             const [selectedTarget, setSelectedTarget] = useState('');
@@ -517,6 +588,19 @@
             const currentAdminRawPrice = useMemo(() => {
                 return steelGrade && adminRawPrices ? adminRawPrices[steelGrade] || '' : '';
             }, [steelGrade, adminRawPrices]);
+
+            // Определяем, как оценивается остаток для выбранной марки и профиля
+            const currentRemnantPricingRule = useMemo(() => {
+                if (!steelGrade) return 'remnant';
+                return remnantPricing && remnantPricing[steelGrade] && remnantPricing[steelGrade][profileType]
+                    ? remnantPricing[steelGrade][profileType]
+                    : 'remnant';
+            }, [steelGrade, profileType, remnantPricing]);
+
+            // Определяем финальную цену остатка
+            const effectiveRemnantPrice = useMemo(() => {
+                return currentRemnantPricingRule === 'scrap' ? adminScrapPrice : adminRemnantPrice;
+            }, [currentRemnantPricingRule, adminScrapPrice, adminRemnantPrice]);
 
             const targetOptions = useMemo(() => {
                 const targets = activeData.map(item => item.target);
@@ -701,10 +785,10 @@
 
             // Стоимость остатка оценивается по Цене деловых остатков
             const remnantValue = useMemo(() => {
-                if (!remnantWeight || !adminRemnantPrice) return null;
-                const val = Number(remnantWeight.tons) * Number(adminRemnantPrice);
+                if (!remnantWeight || !effectiveRemnantPrice) return null;
+                const val = Number(remnantWeight.tons) * Number(effectiveRemnantPrice);
                 return isNaN(val) ? null : val.toFixed(2);
-            }, [remnantWeight, adminRemnantPrice]);
+            }, [remnantWeight, effectiveRemnantPrice]);
 
             const advancedRemnantStats = useMemo(() => {
                 const hasRemnant = remnantLength && Number(remnantLength) > 0 && orderedLength && Number(orderedLength) > 0 && piecesPerBar > 0;
@@ -724,28 +808,49 @@
                 
                 const kgPerTon = totalRatio * 1000;
                 const tonsPerTon = totalRatio;
-                const valuePerTon = currentAdminRawPrice ? totalRatio * Number(currentAdminRawPrice) : null;
+                const valuePerTon = currentAdminRawPrice ? totalRatio * Number(currentAdminRawPrice) : 0;
                 
-                const revenuePerTon = (remRatio * Number(adminRemnantPrice || 0)) + (techRatio * Number(adminScrapPrice || 0));
+                // Детализированный возврат: остатки + лом
+                const remnantRevenuePerTon = remRatio * Number(effectiveRemnantPrice || 0);
+                const techScrapRevenuePerTon = techRatio * Number(adminScrapPrice || 0);
+                const revenuePerTon = remnantRevenuePerTon + techScrapRevenuePerTon;
                 
                 let orderScrapTons = 0, orderScrapValue = null, orderRevenue = 0;
+                let orderTechTons = 0, orderRemTons = 0;
+                let orderTechRevenue = 0, orderRemRevenue = 0;
                 
                 if (orderWeight && Number(orderWeight) > 0) {
-                    orderScrapTons = totalRatio * Number(orderWeight);
+                    const w = Number(orderWeight);
+                    orderScrapTons = totalRatio * w;
+                    orderTechTons = techRatio * w;
+                    orderRemTons = remRatio * w;
+
                     if (currentAdminRawPrice) orderScrapValue = orderScrapTons * Number(currentAdminRawPrice);
-                    orderRevenue = revenuePerTon * Number(orderWeight);
+                    
+                    orderTechRevenue = techScrapRevenuePerTon * w;
+                    orderRemRevenue = remnantRevenuePerTon * w;
+                    orderRevenue = revenuePerTon * w;
                 }
                 
                 return {
                     kgPerTon: kgPerTon.toFixed(1), 
                     tonsPerTon: tonsPerTon.toFixed(3),
+                    techTonsPerTon: techRatio,
+                    remTonsPerTon: remRatio,
                     valuePerTon: valuePerTon !== null ? valuePerTon.toFixed(2) : null,
                     revenuePerTon: revenuePerTon,
+                    techScrapRevenuePerTon,
+                    remnantRevenuePerTon,
+                    
                     orderScrapTons: orderScrapTons.toFixed(3),
+                    orderTechTons,
+                    orderRemTons,
                     orderScrapValue: orderScrapValue !== null ? orderScrapValue.toFixed(2) : null,
-                    orderRevenue: orderRevenue
+                    orderRevenue,
+                    orderTechRevenue,
+                    orderRemRevenue
                 };
-            }, [remnantLength, orderedLength, currentAdminRawPrice, adminScrapPrice, adminRemnantPrice, orderWeight, piecesPerBar, techEndsMm]);
+            }, [remnantLength, orderedLength, currentAdminRawPrice, adminScrapPrice, effectiveRemnantPrice, orderWeight, piecesPerBar, techEndsMm]);
 
             const commercialStats = useMemo(() => {
                 if (!sellPrice || !currentAdminRawPrice || !orderWeight) return null;
@@ -778,7 +883,7 @@
                 netLossesTotal: netLossesPerTon * weight,
                 isPositive: profitTotal >= 0
                 };
-            }, [sellPrice, currentAdminRawPrice, adminScrapPrice, adminRemnantPrice, orderWeight, advancedRemnantStats]);
+            }, [sellPrice, currentAdminRawPrice, adminScrapPrice, effectiveRemnantPrice, orderWeight, advancedRemnantStats]);
 
             const formatCurrency = (value) => {
                 if (value === null || value === undefined || isNaN(Number(value))) return '0,00';
@@ -1182,7 +1287,7 @@
                             <div className="relative w-full sm:w-1/3 shrink-0">
                             <input 
                                 type="text" inputMode="numeric" value={orderedLength} onChange={(e) => handleNumericInput(e, setOrderedLength)} 
-                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-12 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
+                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-12 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-50 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
                             />
                             <span className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-base">мм</span>
                             </div>
@@ -1251,10 +1356,14 @@
                                         {remnantWeight && <p className="text-green-600/80 font-medium text-[10px] sm:text-sm">~ {remnantWeight.tons} т ({remnantWeight.kg} кг)</p>}
                                     </div>
                                     </div>
-                                    {remnantValue && adminRemnantPrice && (
-                                    <div className="bg-white/70 px-3 py-2 sm:px-5 sm:py-3 rounded-[10px] sm:rounded-[16px] w-full lg:w-auto">
-                                        <span className="block text-[10px] sm:text-xs text-green-600 font-medium mb-0.5">Оценочная стоимость остатка</span>
-                                        <span className="text-[14px] sm:text-lg font-semibold text-green-800">{new Intl.NumberFormat('ru-RU').format(remnantValue)} руб.</span>
+                                    {remnantValue && effectiveRemnantPrice && (
+                                    <div className={`px-3 py-2 sm:px-5 sm:py-3 rounded-[10px] sm:rounded-[16px] w-full lg:w-auto ${currentRemnantPricingRule === 'scrap' ? 'bg-orange-100/70 border border-orange-200' : 'bg-white/70'}`}>
+                                        <span className={`block text-[10px] sm:text-xs font-medium mb-0.5 ${currentRemnantPricingRule === 'scrap' ? 'text-orange-600' : 'text-green-600'}`}>
+                                            {currentRemnantPricingRule === 'scrap' ? 'Оценочная стоимость (по цене лома)' : 'Оценочная стоимость остатка'}
+                                        </span>
+                                        <span className={`text-[14px] sm:text-lg font-semibold ${currentRemnantPricingRule === 'scrap' ? 'text-orange-800' : 'text-green-800'}`}>
+                                            {new Intl.NumberFormat('ru-RU').format(remnantValue)} руб.
+                                        </span>
                                     </div>
                                     )}
                                 </div>
@@ -1400,16 +1509,45 @@
                                         <span className="shrink-0">- Стоимость заготовки:</span>
                                         <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(currentAdminRawPrice)} руб.` : '—'}</span>
                                     </div>
+                                    
+                                    {/* Блок затрат на отходы */}
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Затраты на отходы (1 т):</span>
-                                        <span className="text-right shrink-0">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
+                                        <span className="shrink-0 font-medium">- Затраты на отходы (1 т):</span>
+                                        <span className="text-right shrink-0 font-medium">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
                                     </div>
-                                    {commercialStats.scrapRevenuePerTon > 0 && (
-                                    <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат лома и остатков:</span>
-                                        <span className="text-right shrink-0">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
-                                    </div>
+                                    {advancedRemnantStats && currentAdminRawPrice && advancedRemnantStats.valuePerTon > 0 && (
+                                        <div className="pl-3 mt-1 space-y-1 border-l-2 border-[#fca5a5]/30">
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2">Покупка сырья под отход ({(advancedRemnantStats.tonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(currentAdminRawPrice)} руб/т)</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.valuePerTon)} руб.</span>
+                                            </div>
+                                        </div>
                                     )}
+
+                                    {/* Блок возврата отходов */}
+                                    {commercialStats.scrapRevenuePerTon > 0 && (
+                                    <>
+                                        <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
+                                            <span className="shrink-0 font-medium">+ Возврат лома и остатков:</span>
+                                            <span className="text-right shrink-0 font-medium">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
+                                        </div>
+                                        <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
+                                            {advancedRemnantStats?.techScrapRevenuePerTon > 0.01 && (
+                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                    <span className="pr-2">Сдача тех. концов ({(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(adminScrapPrice)} руб/т)</span>
+                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.techScrapRevenuePerTon)} руб.</span>
+                                                </div>
+                                            )}
+                                            {advancedRemnantStats?.remnantRevenuePerTon > 0.01 && (
+                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                    <span className="pr-2">Деловой остаток ({(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(effectiveRemnantPrice)} руб/т)</span>
+                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.remnantRevenuePerTon)} руб.</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                    )}
+
                                     <div className="pt-3 sm:pt-4 mt-2 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                         <div>
                                         <span className="font-bold text-white text-[14px] sm:text-[15px] block">Маржа (1 тн, без НДС):</span>
@@ -1441,16 +1579,45 @@
                                         <span className="shrink-0">- Стоимость заготовки:</span>
                                         <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.rawTotal)} руб.` : '—'}</span>
                                     </div>
+                                    
+                                    {/* Блок затрат на отходы (заказ) */}
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Затраты на отходы (весь заказ):</span>
-                                        <span className="text-right shrink-0">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
+                                        <span className="shrink-0 font-medium">- Затраты на отходы (весь заказ):</span>
+                                        <span className="text-right shrink-0 font-medium">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
                                     </div>
-                                    {commercialStats.scrapRevenueTotal > 0 && (
-                                    <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат лома и остатков:</span>
-                                        <span className="text-right shrink-0">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
-                                    </div>
+                                    {advancedRemnantStats && currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue > 0 && (
+                                        <div className="pl-3 mt-1 space-y-1 border-l-2 border-[#fca5a5]/30">
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2">Покупка сырья под отход ({advancedRemnantStats.orderScrapTons} т × {formatCurrency(currentAdminRawPrice)} руб/т)</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderScrapValue)} руб.</span>
+                                            </div>
+                                        </div>
                                     )}
+
+                                    {/* Блок возврата отходов (заказ) */}
+                                    {commercialStats.scrapRevenueTotal > 0 && (
+                                    <>
+                                        <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
+                                            <span className="shrink-0 font-medium">+ Возврат лома и остатков:</span>
+                                            <span className="text-right shrink-0 font-medium">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
+                                        </div>
+                                        <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
+                                            {advancedRemnantStats?.orderTechRevenue > 0.01 && (
+                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                    <span className="pr-2">Сдача тех. концов ({advancedRemnantStats.orderTechTons.toFixed(3)} т × {formatCurrency(adminScrapPrice)} руб/т)</span>
+                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderTechRevenue)} руб.</span>
+                                                </div>
+                                            )}
+                                            {advancedRemnantStats?.orderRemRevenue > 0.01 && (
+                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                    <span className="pr-2">Деловой остаток ({advancedRemnantStats.orderRemTons.toFixed(3)} т × {formatCurrency(effectiveRemnantPrice)} руб/т)</span>
+                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderRemRevenue)} руб.</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                    )}
+
                                     <div className="pt-4 sm:pt-5 mt-2 sm:mt-3 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
                                         <div>
                                         <span className="font-bold text-white text-[15px] sm:text-base uppercase tracking-wider block">Итоговая маржа без НДС:</span>
@@ -1505,11 +1672,11 @@
                                 
                                 {/* Внимание: Убыток */}
                                 {commercialStats.profitPerTon <= 0 && currentAdminRawPrice && sellPrice && (
-                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3.5 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2.5 sm:gap-4">
-                                    <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
+                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2 sm:gap-4">
+                                    <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
                                     <div>
-                                    <h5 className="text-red-300 font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
-                                    <p className="text-red-200/80 text-[11px] sm:text-[13px] leading-relaxed">
+                                    <h5 className="text-red-300 font-bold text-[12px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
+                                    <p className="text-red-200/80 text-[10px] sm:text-[13px] leading-relaxed">
                                         Сделка приносит убыток. Пересмотрите цену продажи или согласуйте с клиентом оптимальную длину для устранения отходов.
                                     </p>
                                     </div>
@@ -1537,6 +1704,7 @@
             const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
             const [globalRemnantPrice, setGlobalRemnantPrice] = useState('30000');
             const [customGrades, setCustomGrades] = useState([]);
+            const [remnantPricing, setRemnantPricing] = useState({});
 
             // 1. Инициализация анонимной сессии с обработкой таймаута
             useEffect(() => {
@@ -1582,11 +1750,16 @@
                     const savedScrap = window.localStorage.getItem('arsenal_scrap_price');
                     const savedRemnant = window.localStorage.getItem('arsenal_remnant_price');
                     const savedCustomGrades = window.localStorage.getItem('arsenal_custom_grades');
+                    const savedRemnantPricing = window.localStorage.getItem('arsenal_remnant_pricing');
                     
                     let loadedCustomGrades = [];
                     if (savedCustomGrades) {
                         loadedCustomGrades = JSON.parse(savedCustomGrades);
                         setCustomGrades(loadedCustomGrades);
+                    }
+
+                    if (savedRemnantPricing) {
+                        setRemnantPricing(JSON.parse(savedRemnantPricing));
                     }
 
                     if (savedRaw) {
@@ -1616,6 +1789,11 @@
                                 window.localStorage.setItem('arsenal_custom_grades', JSON.stringify(currentCustomGrades));
                             }
                             
+                            if (data.remnantPricing) {
+                                setRemnantPricing(data.remnantPricing);
+                                window.localStorage.setItem('arsenal_remnant_pricing', JSON.stringify(data.remnantPricing));
+                            }
+
                             if (data.rawPrices) {
                                 const loadedPrices = { ...DEFAULT_RAW_PRICES };
                                 const allG = [...DEFAULT_STEEL_GRADES, ...currentCustomGrades];
@@ -1646,17 +1824,19 @@
             }, [user, isCloudActive]);
 
             // 3. Сохранение цен
-            const handleSaveGlobal = async (rawPricesObj, scrapStr, remnantStr, cGrades) => {
+            const handleSaveGlobal = async (rawPricesObj, scrapStr, remnantStr, cGrades, rPricing) => {
                 setGlobalRawPrices(rawPricesObj);
                 setGlobalScrapPrice(scrapStr);
                 setGlobalRemnantPrice(remnantStr);
                 if(cGrades) setCustomGrades(cGrades);
+                if(rPricing) setRemnantPricing(rPricing);
                 
                 try {
                     window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(rawPricesObj));
                     window.localStorage.setItem('arsenal_scrap_price', scrapStr);
                     window.localStorage.setItem('arsenal_remnant_price', remnantStr);
                     if(cGrades) window.localStorage.setItem('arsenal_custom_grades', JSON.stringify(cGrades));
+                    if(rPricing) window.localStorage.setItem('arsenal_remnant_pricing', JSON.stringify(rPricing));
                 } catch(e) {}
 
                 if (db && user && appId && isCloudActive && user.uid !== 'local-user') {
@@ -1670,6 +1850,7 @@
                         remnantPrice: remnantStr
                     };
                     if (cGrades) payload.customGrades = cGrades;
+                    if (rPricing) payload.remnantPricing = rPricing;
                     
                     const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
                     await setDoc(pricesDocRef, payload, { merge: true });
@@ -1693,6 +1874,7 @@
                         initialScrap={globalScrapPrice} 
                         initialRemnant={globalRemnantPrice}
                         initialCustomGrades={customGrades}
+                        initialRemnantPricing={remnantPricing}
                         onSave={handleSaveGlobal} 
                         onLogout={() => setView('login')} 
                         isCloudActive={isCloudActive}
@@ -1706,6 +1888,7 @@
                     adminScrapPrice={globalScrapPrice} 
                     adminRemnantPrice={globalRemnantPrice}
                     customGrades={customGrades}
+                    remnantPricing={remnantPricing}
                     onLogout={() => setView('login')} 
                     isCloudActive={isCloudActive}
                 />
