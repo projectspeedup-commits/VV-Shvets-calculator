@@ -52,7 +52,6 @@
             const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
             let finalConfig = envConfig;
             
-            // Если ключи заполнены вручную для GitHub
             if (!finalConfig && GITHUB_FIREBASE_CONFIG && GITHUB_FIREBASE_CONFIG.apiKey) {
                 finalConfig = GITHUB_FIREBASE_CONFIG;
             }
@@ -328,50 +327,55 @@
                 setIsSaving(true);
                 setSaveError('');
                 try {
-                    await onSave(rawPrices, scrap, remnant);
+                    const savePromise = onSave(rawPrices, scrap, remnant);
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("CloudTimeout")), 5000));
+                    
+                    await Promise.race([savePromise, timeoutPromise]);
+                    
                     setSaved(true);
                     setTimeout(() => setSaved(false), 3000);
                 } catch (e) {
                     console.error("Ошибка сохранения:", e);
-                    setSaveError("Ошибка сохранения. Проверьте подключение.");
+                    setSaveError("Облако недоступно. Сохранено локально.");
+                    setTimeout(() => setSaveError(''), 4000);
                 }
                 setIsSaving(false);
             };
 
             return (
                 <div className="min-h-screen flex items-center justify-center bg-[#F5F5F7] px-4 font-sans text-gray-900 py-12">
-                    <div className="bg-white p-6 sm:p-10 rounded-[32px] shadow-lg border border-gray-50 w-full max-w-2xl relative overflow-hidden">
+                    <div className="bg-white p-4 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-lg border border-gray-50 w-full max-w-3xl relative overflow-hidden">
                         
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500"></div>
 
-                        <div className="flex flex-col items-center mb-8">
-                            <div className="w-16 h-16 bg-blue-50 rounded-[20px] flex items-center justify-center shadow-sm border border-blue-100 mb-4">
-                                <Cloud className="w-8 h-8 text-blue-500" />
+                        <div className="flex flex-col items-center mb-6 sm:mb-8">
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-50 rounded-[16px] sm:rounded-[20px] flex items-center justify-center shadow-sm border border-blue-100 mb-4">
+                                <Cloud className="w-7 h-7 sm:w-8 sm:h-8 text-blue-500" />
                             </div>
-                            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 text-center">
+                            <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 text-center">
                                 {isCloudActive ? 'Облачные цены' : 'Локальные цены'}
                             </h2>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1.5 text-center px-4 max-w-sm">
+                            <p className="text-[11px] sm:text-sm text-gray-500 mt-1.5 text-center px-2 max-w-sm leading-relaxed">
                                 {isCloudActive 
                                     ? 'Установленные здесь цены мгновенно синхронизируются со всеми менеджерами.'
                                     : 'Внимание: Облако не настроено. Цены сохраняются локально только в этом браузере.'}
                             </p>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                             
                             {/* Блок цен на заготовку */}
-                            <div className="bg-[#F5F5F7]/80 p-5 rounded-2xl border border-gray-100/50">
-                                <h3 className="text-[13px] font-bold text-gray-800 mb-4 uppercase tracking-wider">Цена заготовки по маркам стали (руб/тн)</h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
+                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-3 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Цена заготовки (руб/тн)</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                                     {STEEL_GRADES.map(grade => (
-                                        <div key={grade} className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex items-center">
-                                            <label className="text-[12px] font-medium text-gray-600 w-20 shrink-0 ml-1">{grade}</label>
+                                        <div key={grade} className="bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between">
+                                            <label className="text-[11px] sm:text-[12px] font-medium text-gray-600 mb-1 sm:mb-0 ml-1">{grade}</label>
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Цена..."
                                                 value={formatInputValue(rawPrices[grade] || '')} 
                                                 onChange={(e) => handlePriceChange(grade, e.target.value)} 
-                                                className="w-full bg-transparent border-none text-gray-900 h-8 text-[14px] font-semibold outline-none text-right placeholder-gray-300" 
+                                                className="w-full sm:w-20 bg-transparent border-none text-gray-900 h-6 sm:h-8 text-[13px] sm:text-[14px] font-bold sm:font-semibold outline-none text-left sm:text-right placeholder-gray-300" 
                                             />
                                         </div>
                                     ))}
@@ -379,46 +383,46 @@
                             </div>
 
                             {/* Цена лома и остатков */}
-                            <div className="bg-[#F5F5F7]/80 p-5 rounded-2xl border border-gray-100/50">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center mb-2">Цена лома (руб/тн)</label>
+                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена лома (руб/тн)</label>
                                         <div className="relative shadow-sm">
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Например: 20000"
                                                 value={formatInputValue(scrap)} onChange={(e) => handleNumericInput(e, setScrap)} 
-                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[16px] pl-4 pr-12 h-14 text-[15px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-center" 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-12 h-12 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">руб</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs sm:text-sm">руб</span>
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="block text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center mb-2">Цена делового остатка (руб/тн)</label>
+                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена остатка (руб/тн)</label>
                                         <div className="relative shadow-sm">
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Например: 35000"
                                                 value={formatInputValue(remnant)} onChange={(e) => handleNumericInput(e, setRemnant)} 
-                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[16px] pl-4 pr-12 h-14 text-[15px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-center" 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-12 h-12 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">руб</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs sm:text-sm">руб</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="pt-2 space-y-3 sm:max-w-sm sm:mx-auto">
-                                {saveError && <div className="text-red-500 text-sm font-bold text-center">{saveError}</div>}
+                                {saveError && <div className="text-red-500 text-[13px] font-bold text-center bg-red-50 p-2 rounded-lg">{saveError}</div>}
                                 <button 
                                     onClick={handleSave} 
                                     disabled={isSaving}
-                                    className={`w-full flex justify-center items-center gap-2 text-white rounded-2xl h-14 text-[15px] font-bold shadow-md transition-all focus:outline-none active:scale-[0.98] ${saved ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'} ${isSaving ? 'opacity-70 pointer-events-none' : ''}`}
+                                    className={`w-full flex justify-center items-center gap-2 text-white rounded-[14px] sm:rounded-2xl h-12 sm:h-14 text-[14px] sm:text-[15px] font-bold shadow-md transition-all focus:outline-none active:scale-[0.98] ${saved ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'} ${isSaving ? 'opacity-70 pointer-events-none' : ''}`}
                                 >
                                     {isSaving ? 'Сохранение...' : (saved ? '✓ Успешно сохранено' : 'Сохранить и применить')}
                                 </button>
                                 
                                 <button 
                                     onClick={onLogout} 
-                                    className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-2xl h-12 text-[14px] font-semibold transition-all focus:outline-none"
+                                    className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-[14px] sm:rounded-2xl h-10 sm:h-12 text-[13px] sm:text-[14px] font-semibold transition-all focus:outline-none"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Выйти
@@ -661,10 +665,8 @@
                 
                 const kgPerTon = totalRatio * 1000;
                 const tonsPerTon = totalRatio;
-                // Затраты на покупку всего этого отхода:
                 const valuePerTon = currentAdminRawPrice ? totalRatio * Number(currentAdminRawPrice) : null;
                 
-                // Возврат: остатки по цене остатков + лом по цене лома
                 const revenuePerTon = (remRatio * Number(adminRemnantPrice || 0)) + (techRatio * Number(adminScrapPrice || 0));
                 
                 let orderScrapTons = 0, orderScrapValue = null, orderRevenue = 0;
@@ -867,300 +869,300 @@
                 </div>
 
                 {/* --- ВЕБ-ИНТЕРФЕЙС КАЛЬКУЛЯТОРА --- */}
-                <div className="min-h-screen py-4 sm:py-8 lg:py-12 px-3 sm:px-6 font-sans text-gray-900 print:!hidden flex justify-center">
-                <div className="max-w-[1024px] w-full space-y-5 sm:space-y-8">
+                <div className="min-h-screen py-4 sm:py-6 lg:py-12 px-3 sm:px-6 font-sans text-gray-900 print:!hidden flex justify-center">
+                <div className="max-w-[1024px] w-full space-y-4 sm:space-y-8">
                     
                     {/* ШАПКА */}
-                    <header className="bg-white/80 backdrop-blur-xl sticky top-2 sm:top-4 z-50 rounded-[24px] sm:rounded-[28px] px-4 py-3 sm:px-8 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 print-hide">
-                        <div className="flex items-center gap-3 sm:gap-4 text-center sm:text-left w-full sm:w-auto justify-center sm:justify-start">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-[14px] sm:rounded-[18px] flex items-center justify-center shadow-sm shrink-0">
+                    <header className="bg-white/80 backdrop-blur-xl sticky top-2 sm:top-4 z-50 rounded-[20px] sm:rounded-[28px] px-3 py-3 sm:px-8 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 print-hide">
+                        <div className="flex items-center gap-3 sm:gap-4 text-left w-full sm:w-auto justify-start">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-[12px] sm:rounded-[18px] flex items-center justify-center shadow-sm shrink-0">
                             <Calculator className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div>
-                            <h1 className="text-base sm:text-xl font-semibold tracking-tight text-gray-900 leading-tight">
-                                Калькулятор для менеджеров
+                            <h1 className="text-[15px] sm:text-xl font-semibold tracking-tight text-gray-900 leading-tight">
+                                Калькулятор <span className="hidden sm:inline">для менеджеров</span>
                             </h1>
-                            <p className="text-[11px] sm:text-sm font-medium text-gray-500 mt-0.5">
+                            <p className="text-[10px] sm:text-sm font-medium text-gray-500 mt-0.5">
                                 ООО "ЗМК Арсенал"
                             </p>
                             </div>
                         </div>
                         
-                        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto">
-                            <button onClick={handleCopy} className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 active:scale-95 ${isCopied ? 'bg-green-100 text-green-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'}`}>
+                        <div className="flex flex-wrap items-center justify-start sm:justify-center gap-2 w-full sm:w-auto">
+                            <button onClick={handleCopy} className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full transition-colors font-medium text-[12px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 active:scale-95 ${isCopied ? 'bg-green-100 text-green-700' : 'bg-blue-50 hover:bg-blue-100 text-blue-700'}`}>
                                 {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                 <span className="hidden sm:inline">{isCopied ? 'Скопировано' : 'Скопировать'}</span>
                             </button>
-                            <button onClick={handlePrint} className="flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
+                            <button onClick={handlePrint} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[12px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
                                 <Printer className="w-4 h-4" />
+                                <span className="sm:hidden">Печать</span>
                             </button>
-                            <button onClick={handleReset} className="flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
+                            <button onClick={handleReset} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors font-medium text-[12px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 active:scale-95">
                                 <RotateCcw className="w-4 h-4" />
                             </button>
-                            <div className="w-px h-8 bg-gray-200 mx-1 hidden sm:block"></div>
-                            <button onClick={onLogout} className="flex items-center justify-center gap-2 px-4 py-2 sm:py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-full transition-colors font-medium text-[13px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-300 active:scale-95">
+                            <div className="w-px h-6 sm:h-8 bg-gray-200 mx-0.5 sm:mx-1"></div>
+                            <button onClick={onLogout} className="flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-full transition-colors font-medium text-[12px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-red-300 active:scale-95">
                                 <LogOut className="w-4 h-4" />
-                                <span className="hidden sm:inline">Выйти</span>
                             </button>
                         </div>
                     </header>
 
                     {/* СЕКЦИЯ 1: ОСНОВНЫЕ ПАРАМЕТРЫ */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 print-shadow-none">
+                    <section className="bg-white rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 print-shadow-none">
                     
                         {/* iOS Style Segmented Control */}
-                        <div className="bg-[#E3E3E8]/60 p-1 rounded-[14px] flex max-w-sm mx-auto mb-6 sm:mb-10 print-hide">
+                        <div className="bg-[#E3E3E8]/60 p-1 rounded-[12px] flex max-w-sm mx-auto mb-5 sm:mb-8 print-hide">
                             <button 
                             onClick={() => setProfileType('round')} 
-                            className={`flex-1 py-2 px-3 rounded-[10px] flex items-center justify-center gap-2 text-[13px] sm:text-sm font-semibold transition-all duration-200 ${profileType === 'round' ? 'bg-white text-gray-900 shadow-[0_3px_8px_rgba(0,0,0,0.12)]' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex-1 py-1.5 sm:py-2 px-3 rounded-[10px] flex items-center justify-center gap-2 text-[13px] sm:text-sm font-semibold transition-all duration-200 ${profileType === 'round' ? 'bg-white text-gray-900 shadow-[0_3px_8px_rgba(0,0,0,0.12)]' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                             <Circle className="w-4 h-4" /> Круг
                             </button>
                             <button 
                             onClick={() => setProfileType('hex')} 
-                            className={`flex-1 py-2 px-3 rounded-[10px] flex items-center justify-center gap-2 text-[13px] sm:text-sm font-semibold transition-all duration-200 ${profileType === 'hex' ? 'bg-white text-gray-900 shadow-[0_3px_8px_rgba(0,0,0,0.12)]' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex-1 py-1.5 sm:py-2 px-3 rounded-[10px] flex items-center justify-center gap-2 text-[13px] sm:text-sm font-semibold transition-all duration-200 ${profileType === 'hex' ? 'bg-white text-gray-900 shadow-[0_3px_8px_rgba(0,0,0,0.12)]' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                             <Hexagon className="w-4 h-4" /> Шестигранник
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-end">
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Марка стали</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 items-end">
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Марка стали</label>
                             <div className="relative">
                                 <select 
                                 value={steelGrade} 
                                 onChange={(e) => setSteelGrade(e.target.value)} 
-                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none cursor-pointer"
+                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none cursor-pointer"
                                 >
                                 <option value="" disabled>Выберите марку...</option>
                                 {STEEL_GRADES.map(grade => <option key={grade} value={grade}>{grade}</option>)}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
+                                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </div>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Готовый пруток (мм)</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Готовый пруток (мм)</label>
                             <div className="relative">
                                 <select 
                                 value={selectedTarget} 
                                 onChange={(e) => setSelectedTarget(e.target.value)} 
-                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none cursor-pointer"
+                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none cursor-pointer"
                                 >
                                 <option value="" disabled>Размер...</option>
                                 {targetOptions.map(size => <option key={size} value={size}>{size}</option>)}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
+                                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </div>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Заготовка (мм)</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Заготовка (мм)</label>
                             <div className="relative">
                                 <select 
                                 value={selectedRaw} 
                                 onChange={(e) => setSelectedRaw(e.target.value)} 
                                 disabled={!selectedTarget} 
-                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none disabled:opacity-50 cursor-pointer"
+                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none disabled:opacity-50 cursor-pointer"
                                 >
                                 <option value="" disabled>{selectedTarget ? "Выбор..." : "Ожидание"}</option>
                                 {rawOptions.map(size => <option key={size} value={size}>{size}</option>)}
                                 </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
+                                <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 print-hide">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </div>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Объем заказа</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Объем заказа</label>
                             <div className="relative">
                                 <input 
-                                type="text" inputMode="decimal" placeholder="5" 
+                                type="text" inputMode="decimal" placeholder="Напр. 5" 
                                 value={orderWeight} onChange={(e) => handleNumericInput(e, setOrderWeight)} 
-                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-gray-400" 
+                                className="w-full bg-[#F5F5F7] border border-transparent text-gray-900 rounded-[12px] sm:rounded-[16px] pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder-gray-400" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">тонн</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-sm">тн</span>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена заготовки за 1 тн {isCloudActive ? '(Облако)' : ''}</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена заготовки за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
                                 value={formatInputValue(currentAdminRawPrice)} 
                                 placeholder={steelGrade ? "Не задана" : "Выберите марку"}
-                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none cursor-default placeholder-blue-300" 
+                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[12px] sm:rounded-[16px] pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none cursor-default placeholder-blue-300" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[13px] sm:text-sm">руб</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[12px] sm:text-sm">руб</span>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена лома за 1 т {isCloudActive ? '(Облако)' : ''}</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена лома за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
                                 value={formatInputValue(adminScrapPrice)} 
-                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none cursor-default" 
+                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[12px] sm:rounded-[16px] pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none cursor-default" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[13px] sm:text-sm">руб</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[12px] sm:text-sm">руб</span>
                             </div>
                             </div>
                             
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена делового остатка за 1 т {isCloudActive ? '(Облако)' : ''}</label>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена остатков за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
                                 value={formatInputValue(adminRemnantPrice)} 
-                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none cursor-default" 
+                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[12px] sm:rounded-[16px] pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-base font-semibold outline-none cursor-default" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[13px] sm:text-sm">руб</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[12px] sm:text-sm">руб</span>
                             </div>
                             </div>
                         </div>
                     </section>
 
                     {/* СЕКЦИЯ 2: РАСКРОЙ И ОСТАТКИ */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8 print-shadow-none">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
+                    <section className="bg-white rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-4 sm:space-y-8 print-shadow-none">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="p-1.5 sm:p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
                             <Ruler className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
-                            <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">Раскрой и остатки</h2>
+                            <h2 className="text-[15px] sm:text-xl font-semibold tracking-tight text-gray-900">Раскрой и остатки</h2>
                         </div>
 
                         {/* Блок 2.1: Длина вытяжки */}
-                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-6 items-center bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50 print-shadow-none">
-                            <div className="space-y-1.5 w-full">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Длина заготовки</label>
+                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-6 items-center bg-[#F5F5F7]/60 p-3 sm:p-6 rounded-[16px] sm:rounded-3xl border border-gray-100/50 print-shadow-none">
+                            <div className="space-y-1 sm:space-y-1.5 w-full">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1">Длина заготовки</label>
                             <div className="relative">
                                 <input 
                                 type="text" inputMode="numeric" value={displayedRawLength} onChange={(e) => handleNumericInput(e, (val) => setLengthInput({ value: val, source: 'raw' }))} disabled={!selectedTarget} 
-                                className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all disabled:bg-transparent" 
+                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-lg font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all disabled:bg-transparent" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">мм</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-sm">мм</span>
                             </div>
                             </div>
                             
                             <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300 hidden md:block shrink-0 mx-2" />
                             <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300 md:hidden rotate-90 mx-auto my-1" />
 
-                            <div className="space-y-1.5 w-full">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Длина вытяжки (после волочения)</label>
+                            <div className="space-y-1 sm:space-y-1.5 w-full">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1">Длина вытяжки (после волочения)</label>
                             <div className="relative">
                                 <input 
                                 type="text" inputMode="numeric" value={displayedTargetLength} 
                                 onChange={(e) => handleNumericInput(e, (val) => setLengthInput({ value: val, source: 'target' }))}
                                 disabled={!selectedTarget}
-                                className="w-full bg-white border border-transparent text-blue-600 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] disabled:bg-transparent print-shadow-none" 
+                                className="w-full bg-white border border-transparent text-blue-600 rounded-[12px] sm:rounded-2xl pl-3 sm:pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-lg font-semibold outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] disabled:bg-transparent print-shadow-none" 
                                 />
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">мм</span>
+                                <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-sm">мм</span>
                             </div>
                             </div>
                         </div>
 
-                        {/* Блок 2.2: Технологическая обрезь (Выровнен по нижнему краю) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end bg-indigo-50/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-indigo-100/50 print-shadow-none mt-4 sm:mt-6">
-                            <div className="space-y-1.5 w-full">
-                                <label className="block text-[11px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Обрезь коэфф. (передний)</label>
+                        {/* Блок 2.2: Технологическая обрезь */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 items-end bg-indigo-50/60 p-3 sm:p-6 rounded-[16px] sm:rounded-3xl border border-indigo-100/50 print-shadow-none mt-3 sm:mt-6">
+                            <div className="space-y-1 sm:space-y-1.5 w-full">
+                                <label className="block text-[10px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Обрезь (перед)</label>
                                 <div className="relative">
                                     <input 
                                     type="text" readOnly value={formatInputValue(frontCoef)} 
-                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[12px] sm:rounded-[16px] px-3 h-10 sm:h-12 text-[14px] sm:text-base font-semibold outline-none cursor-default shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
+                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[10px] sm:rounded-[16px] px-2 sm:px-3 h-9 sm:h-12 text-[13px] sm:text-base font-semibold outline-none cursor-default shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5 w-full">
-                                <label className="block text-[11px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Обрезь коэфф. (задний)</label>
+                            <div className="space-y-1 sm:space-y-1.5 w-full">
+                                <label className="block text-[10px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Обрезь (зад)</label>
                                 <div className="relative">
                                     <input 
                                     type="text" readOnly value={formatInputValue(backCoef)} 
-                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[12px] sm:rounded-[16px] px-3 h-10 sm:h-12 text-[14px] sm:text-base font-semibold outline-none cursor-default shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
+                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[10px] sm:rounded-[16px] px-2 sm:px-3 h-9 sm:h-12 text-[13px] sm:text-base font-semibold outline-none cursor-default shadow-[0_2px_10px_rgba(0,0,0,0.02)]" 
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5 w-full">
-                                <label className="block text-[11px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Тех. концы (Итого)</label>
+                            <div className="space-y-1 sm:space-y-1.5 w-full">
+                                <label className="block text-[10px] sm:text-[12px] font-medium text-indigo-900/70 ml-1">Тех. концы (Итого)</label>
                                 <div className="relative">
                                     <input 
                                     type="text" readOnly value={techEndsMm} 
-                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[12px] sm:rounded-[16px] pl-3 pr-10 h-10 sm:h-12 text-[14px] sm:text-base font-bold outline-none cursor-default" 
+                                    className="w-full bg-indigo-100/50 border border-transparent text-indigo-900 rounded-[10px] sm:rounded-[16px] pl-2 sm:pl-3 pr-6 sm:pr-10 h-9 sm:h-12 text-[13px] sm:text-base font-bold outline-none cursor-default" 
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 font-medium text-[12px]">мм</span>
+                                    <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-indigo-500 font-medium text-[10px] sm:text-[12px]">мм</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-1.5 w-full">
-                                <label className="block text-[11px] sm:text-[12px] font-bold text-indigo-900 ml-1 leading-tight">Длина после удаления<br className="hidden lg:block"/> (тех. концов)</label>
+                            <div className="space-y-1 sm:space-y-1.5 w-full col-span-2 lg:col-span-1 mt-1 sm:mt-0">
+                                <label className="block text-[10px] sm:text-[12px] font-bold text-indigo-900 ml-1 leading-tight">Длина после удаления<br className="hidden lg:block"/> (тех. концов)</label>
                                 <div className="relative">
                                     <input 
                                     type="text" readOnly value={lengthAfterTechEnds} 
-                                    className="w-full bg-white border border-indigo-200 text-indigo-700 rounded-[12px] sm:rounded-[16px] pl-3 pr-10 h-10 sm:h-12 text-[15px] sm:text-lg font-bold outline-none shadow-[0_2px_10px_rgba(0,0,0,0.05)] cursor-default" 
+                                    className="w-full bg-white border border-indigo-200 text-indigo-700 rounded-[10px] sm:rounded-[16px] pl-2 sm:pl-3 pr-6 sm:pr-10 h-10 sm:h-12 text-[14px] sm:text-lg font-bold outline-none shadow-[0_2px_10px_rgba(0,0,0,0.05)] cursor-default" 
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 font-bold text-[12px]">мм</span>
+                                    <span className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-indigo-500 font-bold text-[10px] sm:text-[12px]">мм</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Блок 2.3: Требуемая длина */}
-                        <div className="bg-blue-50/50 p-4 sm:p-8 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 border border-blue-100/30">
+                        <div className="bg-blue-50/50 p-4 sm:p-8 rounded-[16px] sm:rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6 border border-blue-100/30">
                             <div>
-                            <label className="block text-[15px] sm:text-lg font-semibold text-gray-900 tracking-tight">Требуемая длина</label>
-                            <p className="text-[12px] sm:text-sm text-gray-500 mt-1">Отгрузка заказчику</p>
+                            <label className="block text-[14px] sm:text-lg font-semibold text-gray-900 tracking-tight">Требуемая длина</label>
+                            <p className="text-[11px] sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Отгрузка заказчику</p>
                             </div>
                             <div className="relative w-full sm:w-1/3 shrink-0">
                             <input 
                                 type="text" inputMode="numeric" value={orderedLength} onChange={(e) => handleNumericInput(e, setOrderedLength)} 
-                                className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-14 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
+                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-12 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
                             />
-                            <span className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-base">мм</span>
+                            <span className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-base">мм</span>
                             </div>
                         </div>
 
                         {/* Блок 2.4: Безотходный раскрой */}
                         {optimalLengths.length > 0 && Number(lengthAfterTechEnds) > 0 && (
-                            <div className="bg-[#F5F5F7] rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-100 mt-4 sm:mt-6 print-hide">
-                            <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                                <div className="p-2 bg-white rounded-full shadow-sm shrink-0 hidden sm:block">
+                            <div className="bg-[#F5F5F7] rounded-[16px] sm:rounded-3xl p-3 sm:p-6 border border-gray-100 mt-4 sm:mt-6 print-hide">
+                            <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-4">
+                                <div className="p-1.5 sm:p-2 bg-white rounded-full shadow-sm shrink-0 hidden sm:block">
                                 <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                                 </div>
-                                <div className="space-y-3 w-full">
+                                <div className="space-y-2 sm:space-y-3 w-full">
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                    <Info className="w-4 h-4 text-blue-500 sm:hidden" />
-                                    <p className="text-[13px] sm:text-sm font-bold text-gray-900">
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <Info className="w-3.5 h-3.5 text-blue-500 sm:hidden" />
+                                    <p className="text-[12px] sm:text-sm font-bold text-gray-900">
                                         Безотходный раскрой (ГОСТ 2500–6500 мм)
                                     </p>
                                     </div>
-                                    <p className="text-[11px] sm:text-[12px] text-gray-500 mt-1.5 sm:mt-1 leading-relaxed">
-                                    Закономерность расчета: <b className="text-gray-700">Оптимальная длина = (Длина после удаления тех. концов / Кол-во частей) − 5 мм на рез</b>. 
+                                    <p className="text-[10px] sm:text-[12px] text-gray-500 mt-1 sm:mt-1 leading-relaxed">
+                                    Закономерность: <b className="text-gray-700">Оптимальная длина = (Длина после удаления тех. концов / Кол-во частей) − 5 мм на рез</b>. 
                                     </p>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-1">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 pt-1">
                                     {optimalLengths.map((opt, i) => (
                                     <button 
                                         key={i} 
                                         onClick={() => setOrderedLength(opt.length.toString())} 
-                                        className="bg-white hover:bg-blue-50 text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200/60 shadow-sm transition-all active:scale-[0.98] group flex items-center justify-between"
+                                        className="bg-white hover:bg-blue-50 text-left p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200/60 shadow-sm transition-all active:scale-[0.98] group flex items-center justify-between"
                                     >
                                         <div>
-                                        <div className="font-bold text-blue-600 text-[14px] sm:text-base">{opt.length} мм</div>
-                                        <div className="text-[10px] sm:text-[11px] text-gray-500 mt-1 font-medium">
+                                        <div className="font-bold text-blue-600 text-[13px] sm:text-base">{opt.length} мм</div>
+                                        <div className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5 sm:mt-1 font-medium">
                                             На {opt.pieces} {opt.pieces === 1 ? 'часть' : (opt.pieces > 1 && opt.pieces < 5) ? 'части' : 'частей'} <span className="sm:hidden"></span>(Остаток / {opt.pieces} − 5 мм)
                                         </div>
                                         </div>
-                                        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shrink-0 ml-2 sm:ml-3">
+                                        <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors shrink-0 ml-2 sm:ml-3">
                                         <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400 group-hover:text-blue-500" />
                                         </div>
                                     </button>
@@ -1173,42 +1175,42 @@
 
                         {/* Блок 2.5: Деловой остаток и потери */}
                         {orderedLength && Number(orderedLength) > 0 && (
-                            <div className="bg-green-50/80 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-green-100 mt-4 sm:mt-0">
+                            <div className="bg-green-50/80 p-4 sm:p-8 rounded-[16px] sm:rounded-3xl border border-green-100 mt-4 sm:mt-0">
                             
                             {/* Деловой остаток */}
                             {remnantLength && Number(remnantLength) > 0 && piecesPerBar > 0 && (
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-green-200/60">
+                                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-6 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-green-200/60">
                                     <div>
-                                    <div className="flex items-center gap-2 mb-1 sm:mb-1.5">
+                                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5">
                                         <h4 className="text-green-800 text-[12px] sm:text-sm font-medium">Деловой остаток</h4>
-                                        <span className="text-[10px] sm:text-xs font-semibold bg-green-200/60 text-green-700 px-2 py-0.5 rounded-md print-hide">
+                                        <span className="text-[9px] sm:text-xs font-semibold bg-green-200/60 text-green-700 px-1.5 py-0.5 rounded-md print-hide">
                                             после реза {piecesPerBar} шт.
                                         </span>
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <p className="text-xl sm:text-3xl font-semibold text-green-700 tracking-tight">{remnantLength} мм</p>
-                                        {remnantWeight && <p className="text-green-600/80 font-medium text-[11px] sm:text-sm">~ {remnantWeight.tons} т ({remnantWeight.kg} кг)</p>}
+                                        <p className="text-lg sm:text-3xl font-semibold text-green-700 tracking-tight">{remnantLength} мм</p>
+                                        {remnantWeight && <p className="text-green-600/80 font-medium text-[10px] sm:text-sm">~ {remnantWeight.tons} т ({remnantWeight.kg} кг)</p>}
                                     </div>
                                     </div>
                                     {remnantValue && adminRemnantPrice && (
-                                    <div className="bg-white/70 px-4 py-2.5 sm:px-5 sm:py-3 rounded-[12px] sm:rounded-[16px] w-full md:w-auto">
+                                    <div className="bg-white/70 px-3 py-2 sm:px-5 sm:py-3 rounded-[10px] sm:rounded-[16px] w-full lg:w-auto">
                                         <span className="block text-[10px] sm:text-xs text-green-600 font-medium mb-0.5">Оценочная стоимость остатка</span>
-                                        <span className="text-[15px] sm:text-lg font-semibold text-green-800">{new Intl.NumberFormat('ru-RU').format(remnantValue)} руб.</span>
+                                        <span className="text-[14px] sm:text-lg font-semibold text-green-800">{new Intl.NumberFormat('ru-RU').format(remnantValue)} руб.</span>
                                     </div>
                                     )}
                                 </div>
                             )}
                             
                             {/* Статистика потерь */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
                                 <div className="space-y-1 sm:space-y-1.5 lg:border-r border-green-200/50 lg:pr-4">
                                     <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Прутков в 1 тонне готовой продукции</span>
-                                    <div className="text-base sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
+                                    <div className="text-[14px] sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
                                     {`~ ${piecesPerTon || 0} шт.`}
                                     </div>
                                     {orderedBarWeight && <div className="text-[10px] sm:text-xs text-green-600/70 mt-0.5">Вес 1 прутка: {orderedBarWeight.kg} кг</div>}
                                     {orderWeight && orderedBarWeight ? (
-                                    <div className="text-[10px] sm:text-xs text-green-800 font-semibold bg-green-200/50 inline-block px-2 py-1 rounded-md mt-1.5">
+                                    <div className="text-[10px] sm:text-xs text-green-800 font-semibold bg-green-200/50 inline-block px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md mt-1 sm:mt-1.5">
                                         Во всем заказе: ~ {new Intl.NumberFormat('ru-RU').format(totalPiecesInOrder || 0)} шт.
                                     </div>
                                     ) : null}
@@ -1216,10 +1218,10 @@
 
                                 {advancedRemnantStats && (
                                     <>
-                                    <div className="space-y-1 sm:space-y-1.5 lg:border-r border-green-200/50 lg:pr-4 pt-3 border-t lg:border-t-0 lg:pt-0">
+                                    <div className="space-y-1 sm:space-y-1.5 lg:border-r border-green-200/50 lg:pr-4 pt-2 border-t lg:border-t-0 lg:pt-0">
                                         <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Затраты на отходы (на 1 т продукции)</span>
-                                        <div className="text-base sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
-                                        {currentAdminRawPrice && advancedRemnantStats.valuePerTon !== null ? `${formatCurrency(advancedRemnantStats.valuePerTon)} руб.` : <span className="text-[12px] sm:text-[13px] text-green-600/60 font-normal">Укажите марку стали</span>}
+                                        <div className="text-[14px] sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
+                                        {currentAdminRawPrice && advancedRemnantStats.valuePerTon !== null ? `${formatCurrency(advancedRemnantStats.valuePerTon)} руб.` : <span className="text-[11px] sm:text-[13px] text-green-600/60 font-normal">Укажите марку стали</span>}
                                         </div>
                                         {currentAdminRawPrice && advancedRemnantStats.tonsPerTon !== null && (
                                             <div className="text-[10px] sm:text-xs text-green-600/70 mt-0.5">
@@ -1228,10 +1230,10 @@
                                         )}
                                     </div>
 
-                                    <div className="space-y-1 sm:space-y-1.5 pt-3 border-t border-green-200/50 lg:border-t-0 lg:pt-0">
+                                    <div className="space-y-1 sm:space-y-1.5 pt-2 border-t border-green-200/50 lg:border-t-0 lg:pt-0">
                                         <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Затраты на отходы (весь заказ)</span>
-                                        <div className="text-base sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
-                                        {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue !== null ? `${formatCurrency(advancedRemnantStats.orderScrapValue)} руб.` : <span className="text-[12px] sm:text-[13px] text-green-600/60 font-normal">Укажите вес и марку</span>}
+                                        <div className="text-[14px] sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
+                                        {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue !== null ? `${formatCurrency(advancedRemnantStats.orderScrapValue)} руб.` : <span className="text-[11px] sm:text-[13px] text-green-600/60 font-normal">Укажите вес и марку</span>}
                                         </div>
                                         {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapTons !== null && <div className="text-[10px] sm:text-xs text-green-600/70 mt-0.5">Масса отхода: {advancedRemnantStats.orderScrapTons} т</div>}
                                     </div>
@@ -1244,10 +1246,10 @@
 
                         {/* Блок 2.6: Предупреждение о превышении длины */}
                         {remnantLength && Number(remnantLength) < 0 && (
-                            <div className="p-3 sm:p-5 bg-orange-50 border border-orange-100 rounded-xl sm:rounded-2xl flex items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-0 print-hide">
-                            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 shrink-0 mt-0.5 sm:mt-0" />
+                            <div className="p-3 sm:p-5 bg-orange-50 border border-orange-100 rounded-xl sm:rounded-2xl flex items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0 print-hide">
+                            <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-orange-500 shrink-0 mt-0.5 sm:mt-0" />
                             <div>
-                                <p className="text-[12px] sm:text-sm font-semibold text-orange-900 mb-0.5">Длина превышает вытяжку</p>
+                                <p className="text-[11px] sm:text-sm font-semibold text-orange-900 mb-0.5">Длина превышает вытяжку</p>
                                 <p className="text-[10px] sm:text-xs text-orange-800/80 leading-relaxed">Из заготовки {displayedRawLength}мм получится пруток длиной {displayedTargetLength} мм. Заказанная длина {orderedLength} мм не поместится.</p>
                             </div>
                             </div>
@@ -1255,83 +1257,82 @@
                     </section>
 
                     {/* СЕКЦИЯ 3: ИТОГ И КОЭФФИЦИЕНТ */}
-                    <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px] print-shadow-none">
-                            <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-6">
-                            <div className="p-1.5 sm:p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
-                                <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                        <div className="bg-white p-4 sm:p-8 rounded-[20px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[100px] sm:min-h-[140px] print-shadow-none">
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-6">
+                            <div className="p-1 sm:p-2 bg-blue-50 text-blue-500 rounded-full print-hide">
+                                <Package className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                             </div>
-                            <h3 className="text-[15px] sm:text-lg font-semibold tracking-tight text-gray-900">Сырье к закупке</h3>
+                            <h3 className="text-[13px] sm:text-lg font-semibold tracking-tight text-gray-900">Сырье к закупке</h3>
                             </div>
                             <div className="flex items-baseline gap-2">
-                            <span className="text-3xl sm:text-5xl font-semibold tracking-tight text-gray-900">{requiredWeight || '0.00'}</span>
-                            <span className="text-base sm:text-xl font-medium text-gray-400">тонн</span>
+                            <span className="text-2xl sm:text-5xl font-semibold tracking-tight text-gray-900">{requiredWeight || '0.00'}</span>
+                            <span className="text-[13px] sm:text-xl font-medium text-gray-400">тонн</span>
                             </div>
                         </div>
 
-                        <div className="bg-white p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[120px] sm:min-h-[140px] print-shadow-none">
-                            <div className="flex items-center gap-2.5 sm:gap-3 mb-3 sm:mb-6">
-                            <div className="p-1.5 sm:p-2 bg-gray-50 text-gray-500 rounded-full print-hide">
-                                <Scale className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <div className="bg-white p-4 sm:p-8 rounded-[20px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 flex flex-col justify-center min-h-[100px] sm:min-h-[140px] print-shadow-none">
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-6">
+                            <div className="p-1 sm:p-2 bg-gray-50 text-gray-500 rounded-full print-hide">
+                                <Scale className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                             </div>
-                            <h3 className="text-[15px] sm:text-lg font-semibold tracking-tight text-gray-900">Общий коэффициент</h3>
+                            <h3 className="text-[13px] sm:text-lg font-semibold tracking-tight text-gray-900">Общий коэффициент</h3>
                             </div>
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex flex-col gap-1 sm:gap-1.5">
                                 <div className="flex items-baseline gap-2">
-                                <span className="text-3xl sm:text-5xl font-semibold tracking-tight text-blue-500">{currentCoefficient ? currentCoefficient.toFixed(3) : '--'}</span>
+                                <span className="text-2xl sm:text-5xl font-semibold tracking-tight text-blue-500">{currentCoefficient ? currentCoefficient.toFixed(3) : '--'}</span>
                                 </div>
                             </div>
                         </div>
                     </section>
 
                     {/* СЕКЦИЯ 4: КОММЕРЧЕСКИЙ БЛОК */}
-                    <section className="bg-white rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-5 sm:space-y-8 print-shadow-none">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gray-50 text-gray-900 rounded-full border border-gray-100 print-hide">
+                    <section className="bg-white rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-50 space-y-4 sm:space-y-8 print-shadow-none">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="p-1.5 sm:p-2 bg-gray-50 text-gray-900 rounded-full border border-gray-100 print-hide">
                             <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
                             </div>
-                            <h2 className="text-lg sm:text-xl font-semibold tracking-tight text-gray-900">Коммерческий расчет</h2>
+                            <h2 className="text-[15px] sm:text-xl font-semibold tracking-tight text-gray-900">Коммерческий расчет</h2>
                         </div>
 
-                        {/* Изменена сетка на lg:grid-cols-3 для широких экранов */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 bg-[#F5F5F7]/60 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50 print-shadow-none">
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Цена продажи за 1 т (без НДС)</label>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 bg-[#F5F5F7]/60 p-3 sm:p-6 rounded-[16px] sm:rounded-3xl border border-gray-100/50 print-shadow-none">
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1">Цена продажи за 1 т (без НДС)</label>
                             <div className="relative">
                                 <input 
                                 type="text" inputMode="decimal" placeholder="55 000" 
                                 value={formatInputValue(sellPrice)} onChange={(e) => handleNumericInput(e, setSellPrice)} 
-                                className="w-full bg-white border border-transparent text-gray-900 rounded-[16px] sm:rounded-2xl pl-4 sm:pl-5 pr-12 h-12 sm:h-14 text-[15px] sm:text-lg font-medium outline-none focus:ring-2 focus:ring-blue-500/40 shadow-sm transition-all print-shadow-none" 
+                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl pl-3 sm:pl-5 pr-10 sm:pr-12 h-11 sm:h-14 text-[14px] sm:text-lg font-medium outline-none focus:ring-2 focus:ring-blue-500/40 shadow-sm transition-all print-shadow-none" 
                                 />
-                                <span className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
+                                <span className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-sm">руб</span>
                             </div>
                             </div>
                             
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (без НДС)</label>
-                            <div className="bg-white border border-transparent rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-12 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
-                                <span className="text-[15px] sm:text-lg font-semibold text-gray-900">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotal) : '0,00'}</span>
-                                <span className="text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (без НДС)</label>
+                            <div className="bg-white border border-transparent rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-11 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
+                                <span className="text-[14px] sm:text-lg font-semibold text-gray-900 truncate">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotal) : '0,00'}</span>
+                                <span className="text-gray-400 font-medium text-[12px] sm:text-sm shrink-0 ml-2">руб</span>
                             </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (с НДС 22%)</label>
-                            <div className="bg-white border border-transparent rounded-[16px] sm:rounded-2xl px-4 sm:px-5 h-12 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
-                                <span className="text-[15px] sm:text-lg font-bold text-gray-900">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotalVat) : '0,00'}</span>
-                                <span className="text-gray-400 font-medium text-[13px] sm:text-sm">руб</span>
+                            <div className="space-y-1 sm:space-y-1.5">
+                            <label className="block text-[11px] sm:text-[13px] font-medium text-gray-500 ml-1">Сумма продажи заказа (с НДС 22%)</label>
+                            <div className="bg-white border border-transparent rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-11 sm:h-14 flex items-center justify-between shadow-sm print-shadow-none">
+                                <span className="text-[14px] sm:text-lg font-bold text-gray-900 truncate">{sellPrice && orderWeight ? formatCurrency(commercialStats?.sellTotalVat) : '0,00'}</span>
+                                <span className="text-gray-400 font-medium text-[12px] sm:text-sm shrink-0 ml-2">руб</span>
                             </div>
                             </div>
                         </div>
 
                         {commercialStats && (
-                            <div className="bg-[#0f172a] text-white p-5 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl space-y-6 sm:space-y-8 print-shadow-none">
+                            <div className="bg-[#0f172a] text-white p-4 sm:p-8 lg:p-8 rounded-[20px] sm:rounded-[32px] shadow-2xl space-y-5 sm:space-y-8 print-shadow-none">
                             
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
                                 {/* РАСЧЕТ НА 1 ТОННУ ПРОДУКЦИИ */}
                                 <div>
                                     <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на 1 тонну продукции</h4>
-                                    <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
+                                    <div className="space-y-2 sm:space-y-3 text-[11px] sm:text-[13px]">
                                     <div className="flex justify-between items-center gap-2">
                                         <span className="text-gray-200 shrink-0">Продажная цена (за 1 т):</span>
                                         <span className="font-bold text-white text-right break-words">{formatCurrency(sellPrice)} руб.</span>
@@ -1342,26 +1343,24 @@
                                     </div>
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
                                         <span className="shrink-0">- Затраты на отходы (1 т):</span>
-                                        <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
+                                        <span className="text-right shrink-0">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
                                     </div>
                                     {commercialStats.scrapRevenuePerTon > 0 && (
                                     <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат от лома и остатков:</span>
-                                        <span className="text-right break-words">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
+                                        <span className="shrink-0">+ Возврат лома и остатков:</span>
+                                        <span className="text-right shrink-0">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
                                     </div>
                                     )}
-                                    <div className="pt-3 sm:pt-4 mt-2 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                                        <div>
-                                        <span className="font-bold text-white text-[14px] sm:text-[15px] block">Маржа (1 тн, без НДС):</span>
-                                        <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 sm:mt-0.5 leading-relaxed pr-2">
+                                    <div className="pt-3 border-t border-gray-700/50 mt-1">
+                                        <span className="font-bold text-white text-[12px] sm:text-[15px] block">Маржа (1 тн, без НДС):</span>
+                                        <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 leading-relaxed">
                                             ({formatCurrency(sellPrice)} − {formatCurrency(currentAdminRawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
                                         </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 self-start sm:self-auto mt-1 sm:mt-0">
-                                            <span className={`font-bold text-xl sm:text-2xl tracking-tight shrink-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className={`font-bold text-xl sm:text-2xl tracking-tight ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
                                             {commercialStats.isPositive ? '+' : ''}{formatCurrency(commercialStats.profitPerTon)} руб.
                                             </span>
-                                            <span className={`text-[11px] sm:text-[13px] font-bold px-2 py-1 rounded-lg bg-opacity-20 ${commercialStats.isPositive ? 'bg-[#34d399] text-[#34d399]' : 'bg-[#f87171] text-[#f87171]'}`}>
+                                            <span className={`text-[10px] sm:text-[13px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-lg bg-opacity-20 ${commercialStats.isPositive ? 'bg-[#34d399] text-[#34d399]' : 'bg-[#f87171] text-[#f87171]'}`}>
                                                 {commercialStats.isPositive ? '+' : ''}{commercialStats.marginPercent.toFixed(1)}%
                                             </span>
                                         </div>
@@ -1372,7 +1371,7 @@
                                 {/* РАСЧЕТ НА ВЕСЬ ЗАКАЗ */}
                                 <div>
                                     <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на весь заказ ({orderWeight || 0} т)</h4>
-                                    <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
+                                    <div className="space-y-2 sm:space-y-3 text-[11px] sm:text-[13px]">
                                     <div className="flex justify-between items-center gap-2">
                                         <span className="text-gray-200 shrink-0">Общая сумма продажи:</span>
                                         <span className="font-bold text-white text-right break-words">{formatCurrency(commercialStats.sellTotal)} руб.</span>
@@ -1383,12 +1382,12 @@
                                     </div>
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
                                         <span className="shrink-0">- Затраты на отходы (весь заказ):</span>
-                                        <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
+                                        <span className="text-right shrink-0">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
                                     </div>
                                     {commercialStats.scrapRevenueTotal > 0 && (
                                     <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат от лома и остатков:</span>
-                                        <span className="text-right break-words">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
+                                        <span className="shrink-0">+ Возврат лома и остатков:</span>
+                                        <span className="text-right shrink-0">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
                                     </div>
                                     )}
                                     <div className="pt-4 sm:pt-5 mt-2 sm:mt-3 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
@@ -1411,18 +1410,18 @@
                                 
                                 {/* Рекомендация по ценообразованию */}
                                 {commercialStats.netLossesPerTon > 0 && (
-                                <div className="bg-[#fffdf0] border border-[#fde68a] p-3.5 sm:p-6 rounded-[16px] sm:rounded-[24px]">
-                                    <div className="flex items-start gap-2.5 sm:gap-4">
-                                    <Info className="w-5 h-5 sm:w-6 sm:h-6 text-[#d97706] mt-0.5 shrink-0" />
+                                <div className="bg-[#fffdf0] border border-[#fde68a] p-3 sm:p-6 rounded-[16px] sm:rounded-[24px]">
+                                    <div className="flex items-start gap-2 sm:gap-4">
+                                    <Info className="w-4 h-4 sm:w-6 sm:h-6 text-[#d97706] mt-0.5 shrink-0" />
                                     <div>
-                                        <h5 className="text-[#92400e] font-bold text-[13px] sm:text-[15px] mb-1 sm:mb-1.5">Рекомендация по цене</h5>
-                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-4">
+                                        <h5 className="text-[#92400e] font-bold text-[12px] sm:text-[15px] mb-1 sm:mb-1.5">Рекомендация по цене</h5>
+                                        <p className="text-[#b45309] text-[10px] sm:text-[13px] leading-relaxed mb-2 sm:mb-4">
                                         В себестоимость ложатся чистые потери от обрезков (с учетом продажи лома): <span className="font-bold text-[#92400e]">{formatCurrency(commercialStats.netLossesPerTon)} руб.</span> на каждую тонну продукции.
                                         </p>
-                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-3">
+                                        <p className="text-[#b45309] text-[10px] sm:text-[13px] leading-relaxed mb-1.5 sm:mb-3">
                                         Рекомендуемая продажная цена (для компенсации чистых потерь):
                                         </p>
-                                        <div className="inline-block bg-white border border-[#fcd34d] px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-[#92400e] font-bold text-[14px] sm:text-lg shadow-sm">
+                                        <div className="inline-block bg-white border border-[#fcd34d] px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-[#92400e] font-bold text-[12px] sm:text-lg shadow-sm">
                                         {formatCurrency(Number(sellPrice) + Number(commercialStats.netLossesPerTon))} руб. / т
                                         </div>
                                     </div>
@@ -1432,11 +1431,11 @@
 
                                 {/* Внимание: Низкая маржинальность */}
                                 {commercialStats.profitPerTon > 0 && commercialStats.profitPerTon < 10000 && (
-                                <div className="bg-[#1e0f13] border border-[#4c1d24] p-3.5 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2.5 sm:gap-4">
-                                    <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-[#f87171] shrink-0 mt-0.5" />
+                                <div className="bg-[#1e0f13] border border-[#4c1d24] p-3 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2 sm:gap-4">
+                                    <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-[#f87171] shrink-0 mt-0.5" />
                                     <div>
-                                    <h5 className="text-[#fca5a5] font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Низкая маржинальность!</h5>
-                                    <p className="text-[#fecaca]/80 text-[11px] sm:text-[13px] leading-relaxed">
+                                    <h5 className="text-[#fca5a5] font-bold text-[12px] sm:text-[15px] mb-0.5 sm:mb-1">Низкая маржинальность!</h5>
+                                    <p className="text-[#fecaca]/80 text-[10px] sm:text-[13px] leading-relaxed">
                                         Прибыль составляет менее 10 000 руб. на 1 тонну (текущая: {formatCurrency(commercialStats.profitPerTon)} руб., это {commercialStats.marginPercent.toFixed(1)}%). Рекомендуется повысить цену или оптимизировать длину раскроя.
                                     </p>
                                     </div>
@@ -1445,11 +1444,11 @@
                                 
                                 {/* Внимание: Убыток */}
                                 {commercialStats.profitPerTon <= 0 && currentAdminRawPrice && sellPrice && (
-                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3.5 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2.5 sm:gap-4">
-                                    <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
+                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2 sm:gap-4">
+                                    <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
                                     <div>
-                                    <h5 className="text-red-300 font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
-                                    <p className="text-red-200/80 text-[11px] sm:text-[13px] leading-relaxed">
+                                    <h5 className="text-red-300 font-bold text-[12px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
+                                    <p className="text-red-200/80 text-[10px] sm:text-[13px] leading-relaxed">
                                         Сделка приносит убыток. Пересмотрите цену продажи или согласуйте с клиентом оптимальную длину для устранения отходов.
                                     </p>
                                     </div>
@@ -1470,28 +1469,44 @@
         function App() {
             const [view, setView] = useState('login');
             const [user, setUser] = useState(null);
+            const [isCloudActive, setIsCloudActive] = useState(false);
             
             // Глобальные стейты цен
             const [globalRawPrices, setGlobalRawPrices] = useState(DEFAULT_RAW_PRICES);
             const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
             const [globalRemnantPrice, setGlobalRemnantPrice] = useState('30000');
 
-            // 1. Инициализация анонимной сессии
+            // 1. Инициализация анонимной сессии с обработкой таймаута
             useEffect(() => {
                 if (!auth) {
-                    // Фоллбэк: если облака нет, впускаем сразу без Firebase
                     setUser({ uid: 'local-user' });
                     return;
                 }
                 const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+                    try {
+                        const loginTask = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
+                            ? signInWithCustomToken(auth, __initial_auth_token)
+                            : signInAnonymously(auth);
+                        
+                        // Даем на подключение максимум 3 секунды
+                        const timeoutTask = new Promise((_, reject) => setTimeout(() => reject(new Error("AuthTimeout")), 3000));
+                        await Promise.race([loginTask, timeoutTask]);
+                    } catch (e) {
+                        console.warn("Auth failed or timed out, working offline", e);
+                        setUser({ uid: 'local-user' });
+                        setIsCloudActive(false);
                     }
                 };
                 initAuth();
-                const unsubscribe = onAuthStateChanged(auth, setUser);
+                const unsubscribe = onAuthStateChanged(auth, (u) => {
+                    if (u) {
+                        setUser(u);
+                        setIsCloudActive(true);
+                    } else {
+                        setUser({ uid: 'local-user' });
+                        setIsCloudActive(false);
+                    }
+                });
                 return () => unsubscribe();
             }, []);
 
@@ -1499,7 +1514,7 @@
             useEffect(() => {
                 if (!user) return;
 
-                // Всегда сначала загружаем из локальной памяти браузера (чтобы интерфейс грузился моментально без задержек)
+                // Сначала всегда загружаем из локальной памяти для мгновенной загрузки интерфейса
                 try {
                     const savedRaw = window.localStorage.getItem('arsenal_raw_prices');
                     const savedScrap = window.localStorage.getItem('arsenal_scrap_price');
@@ -1517,8 +1532,8 @@
                     if (savedRemnant) setGlobalRemnantPrice(savedRemnant);
                 } catch(e) {}
 
-                // Затем пытаемся загрузить актуальные данные из облака
-                if (db && appId) {
+                // Только если мы НЕ в локальном режиме, подключаемся к базе
+                if (db && appId && isCloudActive && user.uid !== 'local-user') {
                     const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
                     const unsubscribe = onSnapshot(pricesDocRef, { includeMetadataChanges: true }, (docSnap) => {
                         if (docSnap.exists()) {
@@ -1532,7 +1547,6 @@
                                     }
                                 });
                                 setGlobalRawPrices(loadedPrices);
-                                // Синхронизируем с локальной памятью браузера
                                 window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(loadedPrices));
                             }
                             if (data.scrapPrice !== undefined) {
@@ -1545,11 +1559,12 @@
                             }
                         }
                     }, (error) => {
-                        console.error("Ошибка чтения из облака:", error);
+                        console.warn("Облако недоступно, работаем локально:", error);
+                        setIsCloudActive(false);
                     });
                     return () => unsubscribe();
                 }
-            }, [user]);
+            }, [user, isCloudActive]);
 
             // 3. Сохранение цен
             const handleSaveGlobal = async (rawPricesObj, scrapStr, remnantStr) => {
@@ -1557,14 +1572,13 @@
                 setGlobalScrapPrice(scrapStr);
                 setGlobalRemnantPrice(remnantStr);
                 
-                // Всегда сохраняем в локальную память для отказоустойчивости
                 try {
                     window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(rawPricesObj));
                     window.localStorage.setItem('arsenal_scrap_price', scrapStr);
                     window.localStorage.setItem('arsenal_remnant_price', remnantStr);
                 } catch(e) {}
 
-                if (db && user && appId) {
+                if (db && user && appId && isCloudActive && user.uid !== 'local-user') {
                     const firestoreRawPrices = {};
                     for (const [k, v] of Object.entries(rawPricesObj)) {
                         firestoreRawPrices[sanitizeKey(k)] = v;
@@ -1583,7 +1597,7 @@
                     <LoginScreen 
                         onManagerLogin={() => setView('manager')} 
                         onAdminLogin={() => setView('admin')} 
-                        isCloudActive={!!db}
+                        isCloudActive={isCloudActive}
                     />
                 );
             }
@@ -1596,7 +1610,7 @@
                         initialRemnant={globalRemnantPrice}
                         onSave={handleSaveGlobal} 
                         onLogout={() => setView('login')} 
-                        isCloudActive={!!db}
+                        isCloudActive={isCloudActive}
                     />
                 );
             }
@@ -1607,7 +1621,7 @@
                     adminScrapPrice={globalScrapPrice} 
                     adminRemnantPrice={globalRemnantPrice}
                     onLogout={() => setView('login')} 
-                    isCloudActive={!!db}
+                    isCloudActive={isCloudActive}
                 />
             );
         }
