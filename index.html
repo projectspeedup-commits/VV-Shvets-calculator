@@ -108,7 +108,6 @@
         const Info = ({className}) => <IconBase className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>;
         const Lock = ({className}) => <IconBase className={className}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></IconBase>;
         const LogOut = ({className}) => <IconBase className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></IconBase>;
-        const Settings = ({className}) => <IconBase className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></IconBase>;
         const User = ({className}) => <IconBase className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></IconBase>;
         const Cloud = ({className}) => <IconBase className={className}><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></IconBase>;
         const Plus = ({className}) => <IconBase className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></IconBase>;
@@ -397,19 +396,19 @@
             };
 
             return (
-                <div className="min-h-screen flex items-start justify-center bg-[#F5F5F7] px-4 font-sans text-gray-900 py-6 sm:py-12">
-                    <div className="bg-white p-4 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-lg border border-gray-50 w-full max-w-4xl relative overflow-hidden">
+                <div className="min-h-screen flex items-start justify-center bg-[#F5F5F7] px-2 sm:px-4 font-sans text-gray-900 py-4 sm:py-12">
+                    <div className="bg-white p-3 sm:p-10 rounded-[20px] sm:rounded-[32px] shadow-lg border border-gray-50 w-full max-w-4xl relative overflow-hidden">
                         
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500"></div>
 
-                        <div className="flex flex-col items-center mb-6 sm:mb-8">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-50 rounded-[16px] sm:rounded-[20px] flex items-center justify-center shadow-sm border border-blue-100 mb-4">
-                                <Cloud className="w-7 h-7 sm:w-8 sm:h-8 text-blue-500" />
+                        <div className="flex flex-col items-center mb-6 sm:mb-8 mt-2">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-50 rounded-[14px] sm:rounded-[20px] flex items-center justify-center shadow-sm border border-blue-100 mb-3 sm:mb-4">
+                                <Cloud className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
                             </div>
                             <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 text-center">
                                 {isCloudActive ? 'Облачные настройки' : 'Локальные настройки'}
                             </h2>
-                            <p className="text-[11px] sm:text-sm text-gray-500 mt-1.5 text-center px-2 max-w-sm leading-relaxed">
+                            <p className="text-[11px] sm:text-sm text-gray-500 mt-1.5 text-center px-1 max-w-sm leading-relaxed">
                                 {isCloudActive 
                                     ? 'Установленные здесь цены и правила мгновенно синхронизируются со всеми менеджерами.'
                                     : 'Внимание: Облако не настроено. Настройки сохраняются локально только в этом браузере.'}
@@ -419,20 +418,20 @@
                         <div className="space-y-4 sm:space-y-6">
                             
                             {/* Управление марками стали */}
-                            <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
-                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-3 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Добавление новой марки стали</h3>
+                            <div className="bg-[#F5F5F7]/80 p-3 sm:p-6 rounded-2xl border border-gray-100/50">
+                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-2 sm:mb-4 uppercase tracking-wider text-center sm:text-left">Добавление новой марки стали</h3>
                                 <div className="flex gap-2 max-w-sm mx-auto sm:mx-0">
                                     <input 
                                         type="text" 
                                         placeholder="Например: ст.50"
                                         value={newGrade}
                                         onChange={(e) => setNewGrade(e.target.value)}
-                                        className="w-full bg-white border border-gray-200 text-gray-900 rounded-[12px] px-3 h-10 sm:h-12 text-[13px] sm:text-[14px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                        className="w-full bg-white border border-gray-200 text-gray-900 rounded-[10px] sm:rounded-[12px] px-3 h-10 sm:h-12 text-[12px] sm:text-[14px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                     />
                                     <button
                                         onClick={handleAddGrade}
                                         disabled={!newGrade.trim()}
-                                        className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center text-white rounded-[12px] px-4 font-semibold transition-colors"
+                                        className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center text-white rounded-[10px] sm:rounded-[12px] px-3 sm:px-4 font-semibold transition-colors"
                                         title="Добавить новую марку"
                                     >
                                         <Plus className="w-5 h-5 sm:hidden" />
@@ -442,17 +441,17 @@
                             </div>
 
                             {/* Блок цен и правил на заготовку */}
-                            <div className="bg-[#F5F5F7]/80 pt-4 pb-0 rounded-2xl border border-gray-100/50 overflow-hidden flex flex-col">
-                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-2 px-4 sm:px-6 uppercase tracking-wider">Управление ценами и политикой остатков</h3>
+                            <div className="bg-[#F5F5F7]/80 pt-3 sm:pt-4 pb-0 rounded-2xl border border-gray-100/50 overflow-hidden flex flex-col">
+                                <h3 className="text-[11px] sm:text-[13px] font-bold text-gray-800 mb-2 px-3 sm:px-6 uppercase tracking-wider text-center sm:text-left">Управление ценами и политикой остатков</h3>
                                 
-                                <div className="overflow-x-auto custom-scrollbar w-full pb-4 px-4 sm:px-6">
-                                    <table className="w-full text-left text-sm whitespace-nowrap mt-2 border-separate" style={{borderSpacing: '0 8px'}}>
+                                <div className="overflow-x-auto custom-scrollbar w-full pb-4 px-2 sm:px-6">
+                                    <table className="w-full text-left text-sm whitespace-nowrap mt-2 border-separate min-w-[500px]" style={{borderSpacing: '0 6px sm:8px'}}>
                                         <thead className="text-gray-400 uppercase text-[10px] sm:text-xs">
                                             <tr>
                                                 <th className="px-2 py-2 font-semibold tracking-wider">Марка</th>
-                                                <th className="px-2 py-2 font-semibold tracking-wider text-right">Цена заготовки (руб/тн)</th>
-                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Остаток (Круг)</th>
-                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Остаток (Шестигр.)</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-right">Цена (руб/тн)</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Круг</th>
+                                                <th className="px-2 py-2 font-semibold tracking-wider text-center">Шестигр.</th>
                                                 <th className="px-2 py-2 w-8"></th>
                                             </tr>
                                         </thead>
@@ -463,45 +462,45 @@
                                                 
                                                 return (
                                                     <tr key={grade} className="bg-white shadow-sm border border-gray-100 transition-colors hover:shadow-md group">
-                                                        <td className="px-3 py-2 font-bold text-gray-700 text-[12px] sm:text-[14px] rounded-l-xl border-y border-l border-gray-100 group-hover:border-blue-100">{grade}</td>
-                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100">
+                                                        <td className="px-2 sm:px-3 py-2 font-bold text-gray-700 text-[11px] sm:text-[14px] rounded-l-lg sm:rounded-l-xl border-y border-l border-gray-100 group-hover:border-blue-100">{grade}</td>
+                                                        <td className="px-1 sm:px-2 py-2 border-y border-gray-100 group-hover:border-blue-100">
                                                             <input 
                                                                 type="text" inputMode="decimal" placeholder="Цена..."
                                                                 value={formatInputValue(rawPrices[grade] || '')} 
                                                                 onChange={(e) => handlePriceChange(grade, e.target.value)} 
-                                                                className="w-full sm:w-28 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg px-2 h-9 text-[13px] font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-right placeholder-gray-300 ml-auto block" 
+                                                                className="w-full min-w-[70px] sm:w-28 bg-gray-50 border border-gray-200 text-gray-900 rounded-md sm:rounded-lg px-2 h-8 sm:h-9 text-[12px] sm:text-[13px] font-semibold outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-right placeholder-gray-300 ml-auto block" 
                                                             />
                                                         </td>
-                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
+                                                        <td className="px-1 sm:px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
                                                             <select 
                                                                 value={pricing.round} 
                                                                 onChange={(e) => handlePricingChange(grade, 'round', e.target.value)}
-                                                                className={`bg-gray-50 border text-gray-700 rounded-lg px-2 h-9 text-[11px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full max-w-[140px] mx-auto ${pricing.round === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
+                                                                className={`bg-gray-50 border text-gray-700 rounded-md sm:rounded-lg px-1 sm:px-2 h-8 sm:h-9 text-[10px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full min-w-[100px] max-w-[140px] mx-auto ${pricing.round === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
                                                             >
                                                                 <option value="remnant">Деловой остаток</option>
                                                                 <option value="scrap">По цене лома</option>
                                                             </select>
                                                         </td>
-                                                        <td className="px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
+                                                        <td className="px-1 sm:px-2 py-2 border-y border-gray-100 group-hover:border-blue-100 text-center">
                                                             <select 
                                                                 value={pricing.hex} 
                                                                 onChange={(e) => handlePricingChange(grade, 'hex', e.target.value)}
-                                                                className={`bg-gray-50 border text-gray-700 rounded-lg px-2 h-9 text-[11px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full max-w-[140px] mx-auto ${pricing.hex === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
+                                                                className={`bg-gray-50 border text-gray-700 rounded-md sm:rounded-lg px-1 sm:px-2 h-8 sm:h-9 text-[10px] sm:text-[12px] font-medium outline-none transition-all cursor-pointer w-full min-w-[100px] max-w-[140px] mx-auto ${pricing.hex === 'scrap' ? 'border-red-200 bg-red-50 text-red-700' : 'border-gray-200 focus:border-blue-500'}`}
                                                             >
                                                                 <option value="remnant">Деловой остаток</option>
                                                                 <option value="scrap">По цене лома</option>
                                                             </select>
                                                         </td>
-                                                        <td className="px-2 py-2 rounded-r-xl border-y border-r border-gray-100 group-hover:border-blue-100 text-center align-middle">
+                                                        <td className="px-1 sm:px-2 py-2 rounded-r-lg sm:rounded-r-xl border-y border-r border-gray-100 group-hover:border-blue-100 text-center align-middle">
                                                             {isCustom ? (
                                                                 <button 
                                                                     onClick={() => handleRemoveGrade(grade)}
-                                                                    className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1.5 flex items-center justify-center mx-auto"
+                                                                    className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-1 sm:p-1.5 flex items-center justify-center mx-auto"
                                                                     title="Удалить марку"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
                                                                 </button>
-                                                            ) : <div className="w-7"></div>}
+                                                            ) : <div className="w-6 sm:w-7"></div>}
                                                         </td>
                                                     </tr>
                                                 )
@@ -512,46 +511,46 @@
                             </div>
 
                             {/* Цена лома и остатков */}
-                            <div className="bg-[#F5F5F7]/80 p-4 sm:p-6 rounded-2xl border border-gray-100/50">
+                            <div className="bg-[#F5F5F7]/80 p-3 sm:p-6 rounded-2xl border border-gray-100/50">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена лома (руб/тн)</label>
+                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1 sm:mb-2">Цена лома (руб/тн)</label>
                                         <div className="relative shadow-sm">
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Например: 20000"
                                                 value={formatInputValue(scrap)} onChange={(e) => handleNumericInput(e, setScrap)} 
-                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-12 h-12 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[13px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs sm:text-sm">руб</span>
+                                            <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[11px] sm:text-sm">руб</span>
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1.5 sm:mb-2">Цена делового остатка (руб/тн)</label>
+                                        <label className="block text-[11px] sm:text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center sm:text-left mb-1 sm:mb-2">Цена делового остатка (руб/тн)</label>
                                         <div className="relative shadow-sm">
                                             <input 
                                                 type="text" inputMode="decimal" placeholder="Например: 35000"
                                                 value={formatInputValue(remnant)} onChange={(e) => handleNumericInput(e, setRemnant)} 
-                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-12 h-12 sm:h-14 text-[14px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[12px] sm:rounded-[16px] pl-4 pr-10 sm:pr-12 h-11 sm:h-14 text-[13px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-center sm:text-left" 
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-xs sm:text-sm">руб</span>
+                                            <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[11px] sm:text-sm">руб</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="pt-2 space-y-3 sm:max-w-sm sm:mx-auto">
-                                {saveError && <div className="text-red-500 text-[13px] font-bold text-center bg-red-50 p-2 rounded-lg">{saveError}</div>}
+                                {saveError && <div className="text-red-500 text-[12px] sm:text-[13px] font-bold text-center bg-red-50 p-2 rounded-lg">{saveError}</div>}
                                 <button 
                                     onClick={handleSave} 
                                     disabled={isSaving}
-                                    className={`w-full flex justify-center items-center gap-2 text-white rounded-[14px] sm:rounded-2xl h-12 sm:h-14 text-[14px] sm:text-[15px] font-bold shadow-md transition-all focus:outline-none active:scale-[0.98] ${saved ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'} ${isSaving ? 'opacity-70 pointer-events-none' : ''}`}
+                                    className={`w-full flex justify-center items-center gap-2 text-white rounded-[12px] sm:rounded-2xl h-12 sm:h-14 text-[13px] sm:text-[15px] font-bold shadow-md transition-all focus:outline-none active:scale-[0.98] ${saved ? 'bg-green-500 shadow-green-500/20' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-500/20'} ${isSaving ? 'opacity-70 pointer-events-none' : ''}`}
                                 >
                                     {isSaving ? 'Сохранение...' : (saved ? '✓ Успешно сохранено' : 'Сохранить и применить')}
                                 </button>
                                 
                                 <button 
                                     onClick={onLogout} 
-                                    className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-[14px] sm:rounded-2xl h-10 sm:h-12 text-[13px] sm:text-[14px] font-semibold transition-all focus:outline-none"
+                                    className="w-full flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-[12px] sm:rounded-2xl h-10 sm:h-12 text-[12px] sm:text-[14px] font-semibold transition-all focus:outline-none"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     Выйти
@@ -783,7 +782,6 @@
                 return { tons: (weightKg / 1000).toFixed(5), kg: weightKg.toFixed(2) };
             }, [remnantLength, selectedTarget, profileType]);
 
-            // Стоимость остатка оценивается по Цене деловых остатков
             const remnantValue = useMemo(() => {
                 if (!remnantWeight || !effectiveRemnantPrice) return null;
                 const val = Number(remnantWeight.tons) * Number(effectiveRemnantPrice);
@@ -799,24 +797,32 @@
                 const productMm = (orderedLength && piecesPerBar > 0) ? Number(orderedLength) * piecesPerBar : 0;
                 if (productMm === 0) return null;
 
-                const remMm = hasRemnant ? Number(remnantLength) : 0;
-                const techMm = hasTechScrap ? Number(techEndsMm) : 0;
+                const rawRemMm = hasRemnant ? Number(remnantLength) : 0;
+                const rawTechMm = hasTechScrap ? Number(techEndsMm) : 0;
 
-                const remRatio = remMm / productMm;
-                const techRatio = techMm / productMm;
-                const totalRatio = remRatio + techRatio;
+                const rawRemRatio = rawRemMm / productMm;
+                const rawTechRatio = rawTechMm / productMm;
+                const totalRatio = rawRemRatio + rawTechRatio;
+                
+                // ВАЖНО: Если настройка = Лом, то деловой остаток отображается отдельно, но помечается "как лом"
+                const remRatio = rawRemRatio;
+                const techRatio = rawTechRatio;
                 
                 const kgPerTon = totalRatio * 1000;
                 const tonsPerTon = totalRatio;
                 const valuePerTon = currentAdminRawPrice ? totalRatio * Number(currentAdminRawPrice) : 0;
                 
-                // Детализированный возврат: остатки + лом
+                const techValuePerTon = currentAdminRawPrice ? techRatio * Number(currentAdminRawPrice) : 0;
+                const remValuePerTon = currentAdminRawPrice ? remRatio * Number(currentAdminRawPrice) : 0;
+
+                // Возврат
                 const remnantRevenuePerTon = remRatio * Number(effectiveRemnantPrice || 0);
                 const techScrapRevenuePerTon = techRatio * Number(adminScrapPrice || 0);
                 const revenuePerTon = remnantRevenuePerTon + techScrapRevenuePerTon;
                 
                 let orderScrapTons = 0, orderScrapValue = null, orderRevenue = 0;
                 let orderTechTons = 0, orderRemTons = 0;
+                let orderTechValue = null, orderRemValue = null;
                 let orderTechRevenue = 0, orderRemRevenue = 0;
                 
                 if (orderWeight && Number(orderWeight) > 0) {
@@ -825,7 +831,11 @@
                     orderTechTons = techRatio * w;
                     orderRemTons = remRatio * w;
 
-                    if (currentAdminRawPrice) orderScrapValue = orderScrapTons * Number(currentAdminRawPrice);
+                    if (currentAdminRawPrice) {
+                        orderScrapValue = orderScrapTons * Number(currentAdminRawPrice);
+                        orderTechValue = orderTechTons * Number(currentAdminRawPrice);
+                        orderRemValue = orderRemTons * Number(currentAdminRawPrice);
+                    }
                     
                     orderTechRevenue = techScrapRevenuePerTon * w;
                     orderRemRevenue = remnantRevenuePerTon * w;
@@ -838,7 +848,9 @@
                     techTonsPerTon: techRatio,
                     remTonsPerTon: remRatio,
                     valuePerTon: valuePerTon !== null ? valuePerTon.toFixed(2) : null,
-                    revenuePerTon: revenuePerTon,
+                    techValuePerTon,
+                    remValuePerTon,
+                    revenuePerTon,
                     techScrapRevenuePerTon,
                     remnantRevenuePerTon,
                     
@@ -846,6 +858,8 @@
                     orderTechTons,
                     orderRemTons,
                     orderScrapValue: orderScrapValue !== null ? orderScrapValue.toFixed(2) : null,
+                    orderTechValue,
+                    orderRemValue,
                     orderRevenue,
                     orderTechRevenue,
                     orderRemRevenue
@@ -927,7 +941,52 @@
                 text += `Длина после удаления: ${lengthAfterTechEnds || '0.0'} мм\n`;
                 text += `Сырье к закупке: ${requiredWeight || '?'} тонн (Заготовка ${selectedRaw || '?'} мм)\n\n`;
                 
-                if (commercialStats) {
+                if (commercialStats && advancedRemnantStats) {
+                    text += `Расчет на 1 тонну продукции\n`;
+                    text += `Продажная цена (за 1 т): ${formatCurrency(sellPrice)} руб.\n`;
+                    text += `- Стоимость заготовки: ${currentAdminRawPrice ? formatCurrency(currentAdminRawPrice) + ' руб.' : '—'}\n`;
+                    text += `- Затраты на отходы (1 т): ${currentAdminRawPrice ? formatCurrency(commercialStats.lossesPerTon) + ' руб.' : '—'}\n`;
+                    if (advancedRemnantStats.techTonsPerTon > 0) {
+                        text += `  Лом (${(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг): ${formatCurrency(advancedRemnantStats.techValuePerTon)} руб.\n`;
+                    }
+                    if (advancedRemnantStats.remTonsPerTon > 0) {
+                        text += `  Деловой остаток (${(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг): ${formatCurrency(advancedRemnantStats.remValuePerTon)} руб.\n`;
+                    }
+
+                    if (commercialStats.scrapRevenuePerTon > 0) {
+                        text += `+ Возврат лома и остатков: ${formatCurrency(commercialStats.scrapRevenuePerTon)} руб.\n`;
+                        if (advancedRemnantStats.techScrapRevenuePerTon > 0.01) {
+                            text += `  Лом (${(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг × ${formatCurrency(adminScrapPrice)} руб/т): ${formatCurrency(advancedRemnantStats.techScrapRevenuePerTon)} руб.\n`;
+                        }
+                        if (advancedRemnantStats.remnantRevenuePerTon > 0.01) {
+                            text += `  Деловой остаток (${(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг × ${formatCurrency(effectiveRemnantPrice)} руб/т)${currentRemnantPricingRule === 'scrap' ? ' как лом' : ''}: ${formatCurrency(advancedRemnantStats.remnantRevenuePerTon)} руб.\n`;
+                        }
+                    }
+                    text += `Маржа (1 тн, без НДС): ${commercialStats.isPositive ? '+' : ''}${formatCurrency(commercialStats.profitPerTon)} руб. (${commercialStats.isPositive ? '+' : ''}${commercialStats.marginPercent.toFixed(1)}%)\n\n`;
+
+                    text += `Расчет на весь заказ (${orderWeight || 0} т)\n`;
+                    text += `Общая сумма продажи: ${formatCurrency(commercialStats.sellTotal)} руб.\n`;
+                    text += `- Стоимость заготовки: ${currentAdminRawPrice && orderWeight ? formatCurrency(commercialStats.rawTotal) + ' руб.' : '—'}\n`;
+                    text += `- Затраты на отходы (весь заказ): ${currentAdminRawPrice && orderWeight ? formatCurrency(commercialStats.lossesTotal) + ' руб.' : '—'}\n`;
+                    if (advancedRemnantStats.orderTechTons > 0) {
+                        text += `  Лом (${advancedRemnantStats.orderTechTons.toFixed(3)} т): ${formatCurrency(advancedRemnantStats.orderTechValue)} руб.\n`;
+                    }
+                    if (advancedRemnantStats.orderRemTons > 0) {
+                        text += `  Деловой остаток (${advancedRemnantStats.orderRemTons.toFixed(3)} т): ${formatCurrency(advancedRemnantStats.orderRemValue)} руб.\n`;
+                    }
+
+                    if (commercialStats.scrapRevenueTotal > 0) {
+                        text += `+ Возврат лома и остатков: ${formatCurrency(commercialStats.scrapRevenueTotal)} руб.\n`;
+                        if (advancedRemnantStats.orderTechRevenue > 0.01) {
+                            text += `  Лом (${advancedRemnantStats.orderTechTons.toFixed(3)} т × ${formatCurrency(adminScrapPrice)} руб/т): ${formatCurrency(advancedRemnantStats.orderTechRevenue)} руб.\n`;
+                        }
+                        if (advancedRemnantStats.orderRemRevenue > 0.01) {
+                            text += `  Деловой остаток (${advancedRemnantStats.orderRemTons.toFixed(3)} т × ${formatCurrency(effectiveRemnantPrice)} руб/т)${currentRemnantPricingRule === 'scrap' ? ' как лом' : ''}: ${formatCurrency(advancedRemnantStats.orderRemRevenue)} руб.\n`;
+                        }
+                    }
+                    text += `Итоговая маржа без НДС: ${commercialStats.isPositive ? '+' : ''}${formatCurrency(commercialStats.profitTotal)} руб.\n`;
+                    text += `Сумма заказа (с НДС 22%): ${formatCurrency(commercialStats.sellTotalVat)} руб.\n`;
+                } else if (commercialStats) {
                     text += `Коммерция:\n`;
                     text += `Сумма заказа (без НДС): ${formatCurrency(commercialStats.sellTotal)} руб.\n`;
                     text += `Сумма заказа (с НДС 22%): ${formatCurrency(commercialStats.sellTotalVat)} руб.\n`;
@@ -1033,7 +1092,7 @@
                 </div>
 
                 {/* --- ВЕБ-ИНТЕРФЕЙС КАЛЬКУЛЯТОРА --- */}
-                <div className="min-h-screen py-4 sm:py-6 lg:py-12 px-3 sm:px-6 font-sans text-gray-900 print:!hidden flex justify-center">
+                <div className="min-h-screen py-4 sm:py-6 lg:py-12 px-2 sm:px-6 font-sans text-gray-900 print:!hidden flex justify-center">
                 <div className="max-w-[1024px] w-full space-y-4 sm:space-y-8">
                     
                     {/* ШАПКА */}
@@ -1156,7 +1215,7 @@
                             </div>
 
                             <div className="space-y-1 sm:space-y-1.5">
-                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена заготовки за 1 тн</label>
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Цена заготовки за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -1169,7 +1228,7 @@
                             </div>
 
                             <div className="space-y-1 sm:space-y-1.5">
-                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена лома за 1 тн</label>
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Цена лома за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -1181,7 +1240,7 @@
                             </div>
                             
                             <div className="space-y-1 sm:space-y-1.5">
-                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight text-truncate">Цена остатков за 1 тн</label>
+                            <label className="block text-[11px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">Цена остатков за 1 тн</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -1287,7 +1346,7 @@
                             <div className="relative w-full sm:w-1/3 shrink-0">
                             <input 
                                 type="text" inputMode="numeric" value={orderedLength} onChange={(e) => handleNumericInput(e, setOrderedLength)} 
-                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-12 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-50 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
+                                className="w-full bg-white border border-transparent text-gray-900 rounded-[12px] sm:rounded-2xl px-3 sm:px-5 h-12 sm:h-16 text-lg sm:text-2xl font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all print-shadow-none" 
                             />
                             <span className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-[12px] sm:text-base">мм</span>
                             </div>
@@ -1308,7 +1367,7 @@
                                         Безотходный раскрой (ГОСТ 2500–6500 мм)
                                     </p>
                                     </div>
-                                    <p className="text-[10px] sm:text-[12px] text-gray-500 mt-1 sm:mt-1 leading-relaxed">
+                                    <p className="text-[10px] sm:text-[12px] text-gray-500 mt-1 sm:mt-1 leading-relaxed whitespace-normal break-words">
                                     Закономерность: <b className="text-gray-700">Оптимальная длина = (Длина после удаления тех. концов / Кол-во частей) − 5 мм на рез</b>. 
                                     </p>
                                 </div>
@@ -1370,7 +1429,7 @@
                             )}
                             
                             {/* Статистика потерь */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-green-200/60">
                                 <div className="space-y-1 sm:space-y-1.5 lg:border-r border-green-200/50 lg:pr-4">
                                     <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Прутков в 1 тонне готовой продукции</span>
                                     <div className="text-[14px] sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
@@ -1392,8 +1451,19 @@
                                         {currentAdminRawPrice && advancedRemnantStats.valuePerTon !== null ? `${formatCurrency(advancedRemnantStats.valuePerTon)} руб.` : <span className="text-[11px] sm:text-[13px] text-green-600/60 font-normal">Укажите марку стали</span>}
                                         </div>
                                         {currentAdminRawPrice && advancedRemnantStats.tonsPerTon !== null && (
-                                            <div className="text-[10px] sm:text-xs text-green-600/70 mt-0.5">
-                                                Масса отхода: {advancedRemnantStats.tonsPerTon} т
+                                            <div className="mt-2 space-y-1.5 border-l-2 border-green-300 pl-2.5">
+                                                {advancedRemnantStats.techTonsPerTon > 0 && (
+                                                <div className="text-[10px] sm:text-[11px] text-green-700 flex justify-between items-center whitespace-normal break-words">
+                                                    <span>Лом ({(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг):</span>
+                                                    <span className="font-semibold text-right shrink-0">{formatCurrency(advancedRemnantStats.techValuePerTon)} руб.</span>
+                                                </div>
+                                                )}
+                                                {advancedRemnantStats.remTonsPerTon > 0 && (
+                                                <div className="text-[10px] sm:text-[11px] text-green-700 flex justify-between items-center whitespace-normal break-words">
+                                                    <span>Деловой остаток ({(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг):</span>
+                                                    <span className="font-semibold text-right shrink-0">{formatCurrency(advancedRemnantStats.remValuePerTon)} руб.</span>
+                                                </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -1403,7 +1473,22 @@
                                         <div className="text-[14px] sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
                                         {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue !== null ? `${formatCurrency(advancedRemnantStats.orderScrapValue)} руб.` : <span className="text-[11px] sm:text-[13px] text-green-600/60 font-normal">Укажите вес и марку</span>}
                                         </div>
-                                        {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapTons !== null && <div className="text-[10px] sm:text-xs text-green-600/70 mt-0.5">Масса отхода: {advancedRemnantStats.orderScrapTons} т</div>}
+                                        {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapTons !== null && (
+                                            <div className="mt-2 space-y-1.5 border-l-2 border-green-300 pl-2.5">
+                                                {advancedRemnantStats.orderTechTons > 0 && (
+                                                <div className="text-[10px] sm:text-[11px] text-green-700 flex justify-between items-center whitespace-normal break-words">
+                                                    <span>Лом ({advancedRemnantStats.orderTechTons.toFixed(3)} т):</span>
+                                                    <span className="font-semibold text-right shrink-0">{formatCurrency(advancedRemnantStats.orderTechValue)} руб.</span>
+                                                </div>
+                                                )}
+                                                {advancedRemnantStats.orderRemTons > 0 && (
+                                                <div className="text-[10px] sm:text-[11px] text-green-700 flex justify-between items-center whitespace-normal break-words">
+                                                    <span>Деловой остаток ({advancedRemnantStats.orderRemTons.toFixed(3)} т):</span>
+                                                    <span className="font-semibold text-right shrink-0">{formatCurrency(advancedRemnantStats.orderRemValue)} руб.</span>
+                                                </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     </>
                                 )}
@@ -1418,7 +1503,7 @@
                             <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-orange-500 shrink-0 mt-0.5 sm:mt-0" />
                             <div>
                                 <p className="text-[11px] sm:text-sm font-semibold text-orange-900 mb-0.5">Длина превышает вытяжку</p>
-                                <p className="text-[10px] sm:text-xs text-orange-800/80 leading-relaxed">Из заготовки {displayedRawLength}мм получится пруток длиной {displayedTargetLength} мм. Заказанная длина {orderedLength} мм не поместится.</p>
+                                <p className="text-[10px] sm:text-xs text-orange-800/80 leading-relaxed whitespace-normal break-words">Из заготовки {displayedRawLength}мм получится пруток длиной {displayedTargetLength} мм. Заказанная длина {orderedLength} мм не поместится.</p>
                             </div>
                             </div>
                         )}
@@ -1498,130 +1583,145 @@
                             
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
                                 {/* РАСЧЕТ НА 1 ТОННУ ПРОДУКЦИИ */}
-                                <div>
-                                    <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на 1 тонну продукции</h4>
-                                    <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
-                                    <div className="flex justify-between items-center gap-2">
-                                        <span className="text-gray-200 shrink-0">Продажная цена (за 1 т):</span>
-                                        <span className="font-bold text-white text-right break-words">{formatCurrency(sellPrice)} руб.</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Стоимость заготовки:</span>
-                                        <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(currentAdminRawPrice)} руб.` : '—'}</span>
-                                    </div>
-                                    
-                                    {/* Блок затрат на отходы */}
-                                    <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0 font-medium">- Затраты на отходы (1 т):</span>
-                                        <span className="text-right shrink-0 font-medium">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
-                                    </div>
-                                    {advancedRemnantStats && currentAdminRawPrice && advancedRemnantStats.valuePerTon > 0 && (
-                                        <div className="pl-3 mt-1 space-y-1 border-l-2 border-[#fca5a5]/30">
+                            <div>
+                                <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на 1 тонну продукции</h4>
+                                <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
+                                <div className="flex justify-between items-center gap-2">
+                                    <span className="text-gray-200 shrink-0">Продажная цена (за 1 т):</span>
+                                    <span className="font-bold text-white text-right break-words">{formatCurrency(sellPrice)} руб.</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[#fca5a5] gap-2">
+                                    <span className="shrink-0">- Стоимость заготовки:</span>
+                                    <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(currentAdminRawPrice)} руб.` : '—'}</span>
+                                </div>
+                                
+                                {/* Блок затрат на отходы */}
+                                <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
+                                    <span className="shrink-0 font-medium whitespace-nowrap break-words">- Затраты на отходы (1 т):</span>
+                                    <span className="text-right shrink-0 font-medium whitespace-nowrap break-words">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
+                                </div>
+                                {advancedRemnantStats && currentAdminRawPrice && advancedRemnantStats.valuePerTon > 0 && (
+                                    <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#fca5a5]/30">
+                                        {advancedRemnantStats.techTonsPerTon > 0 && (
                                             <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                <span className="pr-2">Покупка сырья под отход ({(advancedRemnantStats.tonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(currentAdminRawPrice)} руб/т)</span>
-                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.valuePerTon)} руб.</span>
+                                                <span className="pr-2 whitespace-normal break-words">Лом ({(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.techValuePerTon)} руб.</span>
                                             </div>
-                                        </div>
-                                    )}
-
-                                    {/* Блок возврата отходов */}
-                                    {commercialStats.scrapRevenuePerTon > 0 && (
-                                    <>
-                                        <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
-                                            <span className="shrink-0 font-medium">+ Возврат лома и остатков:</span>
-                                            <span className="text-right shrink-0 font-medium">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
-                                        </div>
-                                        <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
-                                            {advancedRemnantStats?.techScrapRevenuePerTon > 0.01 && (
-                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                    <span className="pr-2">Сдача тех. концов ({(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(adminScrapPrice)} руб/т)</span>
-                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.techScrapRevenuePerTon)} руб.</span>
-                                                </div>
-                                            )}
-                                            {advancedRemnantStats?.remnantRevenuePerTon > 0.01 && (
-                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                    <span className="pr-2">Деловой остаток ({(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(effectiveRemnantPrice)} руб/т)</span>
-                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.remnantRevenuePerTon)} руб.</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </>
-                                    )}
-
-                                    <div className="pt-3 sm:pt-4 mt-2 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                                        <div>
-                                        <span className="font-bold text-white text-[14px] sm:text-[15px] block">Маржа (1 тн, без НДС):</span>
-                                        <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 sm:mt-0.5 leading-relaxed pr-2">
-                                            ({formatCurrency(sellPrice)} − {formatCurrency(currentAdminRawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
-                                        </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 self-start sm:self-auto mt-1 sm:mt-0">
-                                            <span className={`font-bold text-xl sm:text-2xl tracking-tight shrink-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
-                                            {commercialStats.isPositive ? '+' : ''}{formatCurrency(commercialStats.profitPerTon)} руб.
-                                            </span>
-                                            <span className={`text-[11px] sm:text-[13px] font-bold px-2 py-1 rounded-lg bg-opacity-20 ${commercialStats.isPositive ? 'bg-[#34d399] text-[#34d399]' : 'bg-[#f87171] text-[#f87171]'}`}>
-                                                {commercialStats.isPositive ? '+' : ''}{commercialStats.marginPercent.toFixed(1)}%
-                                            </span>
-                                        </div>
+                                        )}
+                                        {advancedRemnantStats.remTonsPerTon > 0 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Деловой остаток ({(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.remValuePerTon)} руб.</span>
+                                            </div>
+                                        )}
                                     </div>
+                                )}
+
+                                {/* Блок возврата отходов */}
+                                {commercialStats.scrapRevenuePerTon > 0 && (
+                                <>
+                                    <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
+                                        <span className="shrink-0 font-medium whitespace-nowrap break-words">+ Возврат лома и остатков:</span>
+                                        <span className="text-right shrink-0 font-medium whitespace-nowrap break-words">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
+                                    </div>
+                                    <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
+                                        {advancedRemnantStats?.techScrapRevenuePerTon > 0.01 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Лом ({(advancedRemnantStats.techTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(adminScrapPrice)} руб/т):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.techScrapRevenuePerTon)} руб.</span>
+                                            </div>
+                                        )}
+                                        {advancedRemnantStats?.remnantRevenuePerTon > 0.01 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Деловой остаток ({(advancedRemnantStats.remTonsPerTon * 1000).toFixed(1)} кг × {formatCurrency(effectiveRemnantPrice)} руб/т){currentRemnantPricingRule === 'scrap' ? ' как лом' : ''}:</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.remnantRevenuePerTon)} руб.</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                                )}
+                                <div className="pt-3 sm:pt-4 mt-2 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                    <div>
+                                    <span className="font-bold text-white text-[14px] sm:text-[15px] block whitespace-normal break-words">Маржа (1 тн, без НДС):</span>
+                                    <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 sm:mt-0.5 leading-relaxed pr-2 whitespace-normal break-words">
+                                        ({formatCurrency(sellPrice)} − {formatCurrency(currentAdminRawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
+                                    </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 self-start sm:self-auto mt-1 sm:mt-0">
+                                        <span className={`font-bold text-xl sm:text-2xl tracking-tight shrink-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
+                                        {commercialStats.isPositive ? '+' : ''}{formatCurrency(commercialStats.profitPerTon)} руб.
+                                        </span>
+                                        <span className={`text-[11px] sm:text-[13px] font-bold px-2 py-1 rounded-lg bg-opacity-20 ${commercialStats.isPositive ? 'bg-[#34d399] text-[#34d399]' : 'bg-[#f87171] text-[#f87171]'}`}>
+                                            {commercialStats.isPositive ? '+' : ''}{commercialStats.marginPercent.toFixed(1)}%
+                                        </span>
                                     </div>
                                 </div>
+                                </div>
+                            </div>
 
-                                {/* РАСЧЕТ НА ВЕСЬ ЗАКАЗ */}
-                                <div>
-                                    <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на весь заказ ({orderWeight || 0} т)</h4>
-                                    <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
-                                    <div className="flex justify-between items-center gap-2">
-                                        <span className="text-gray-200 shrink-0">Общая сумма продажи:</span>
-                                        <span className="font-bold text-white text-right break-words">{formatCurrency(commercialStats.sellTotal)} руб.</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Стоимость заготовки:</span>
-                                        <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.rawTotal)} руб.` : '—'}</span>
-                                    </div>
-                                    
-                                    {/* Блок затрат на отходы (заказ) */}
-                                    <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0 font-medium">- Затраты на отходы (весь заказ):</span>
-                                        <span className="text-right shrink-0 font-medium">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
-                                    </div>
-                                    {advancedRemnantStats && currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue > 0 && (
-                                        <div className="pl-3 mt-1 space-y-1 border-l-2 border-[#fca5a5]/30">
+                            {/* РАСЧЕТ НА ВЕСЬ ЗАКАЗ */}
+                            <div>
+                                <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на весь заказ ({orderWeight || 0} т)</h4>
+                                <div className="space-y-2.5 sm:space-y-3 text-[12px] sm:text-[13px]">
+                                <div className="flex justify-between items-center gap-2">
+                                    <span className="text-gray-200 shrink-0">Общая сумма продажи:</span>
+                                    <span className="font-bold text-white text-right break-words">{formatCurrency(commercialStats.sellTotal)} руб.</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[#fca5a5] gap-2">
+                                    <span className="shrink-0">- Стоимость заготовки:</span>
+                                    <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.rawTotal)} руб.` : '—'}</span>
+                                </div>
+                                
+                                {/* Блок затрат на отходы (заказ) */}
+                                <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
+                                    <span className="shrink-0 font-medium whitespace-normal break-words">- Затраты на отходы (весь заказ):</span>
+                                    <span className="text-right shrink-0 font-medium whitespace-nowrap break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
+                                </div>
+                                {advancedRemnantStats && currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue > 0 && (
+                                    <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#fca5a5]/30">
+                                        {advancedRemnantStats.orderTechTons > 0 && (
                                             <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                <span className="pr-2">Покупка сырья под отход ({advancedRemnantStats.orderScrapTons} т × {formatCurrency(currentAdminRawPrice)} руб/т)</span>
-                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderScrapValue)} руб.</span>
+                                                <span className="pr-2 whitespace-normal break-words">Лом ({advancedRemnantStats.orderTechTons.toFixed(3)} т):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderTechValue)} руб.</span>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+                                        {advancedRemnantStats.orderRemTons > 0 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Деловой остаток ({advancedRemnantStats.orderRemTons.toFixed(3)} т):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderRemValue)} руб.</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
-                                    {/* Блок возврата отходов (заказ) */}
-                                    {commercialStats.scrapRevenueTotal > 0 && (
-                                    <>
-                                        <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
-                                            <span className="shrink-0 font-medium">+ Возврат лома и остатков:</span>
-                                            <span className="text-right shrink-0 font-medium">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
-                                        </div>
-                                        <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
-                                            {advancedRemnantStats?.orderTechRevenue > 0.01 && (
-                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                    <span className="pr-2">Сдача тех. концов ({advancedRemnantStats.orderTechTons.toFixed(3)} т × {formatCurrency(adminScrapPrice)} руб/т)</span>
-                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderTechRevenue)} руб.</span>
-                                                </div>
-                                            )}
-                                            {advancedRemnantStats?.orderRemRevenue > 0.01 && (
-                                                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
-                                                    <span className="pr-2">Деловой остаток ({advancedRemnantStats.orderRemTons.toFixed(3)} т × {formatCurrency(effectiveRemnantPrice)} руб/т)</span>
-                                                    <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderRemRevenue)} руб.</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </>
-                                    )}
+                                {/* Блок возврата отходов (заказ) */}
+                                {commercialStats.scrapRevenueTotal > 0 && (
+                                <>
+                                    <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2 mt-2 sm:mt-3">
+                                        <span className="shrink-0 font-medium whitespace-nowrap break-words">+ Возврат лома и остатков:</span>
+                                        <span className="text-right shrink-0 font-medium whitespace-nowrap break-words">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
+                                    </div>
+                                    <div className="pl-3 mt-1 space-y-1.5 border-l-2 border-[#34d399]/30">
+                                        {advancedRemnantStats?.orderTechRevenue > 0.01 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Лом ({advancedRemnantStats.orderTechTons.toFixed(3)} т × {formatCurrency(adminScrapPrice)} руб/т):</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderTechRevenue)} руб.</span>
+                                            </div>
+                                        )}
+                                        {advancedRemnantStats?.orderRemRevenue > 0.01 && (
+                                            <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400">
+                                                <span className="pr-2 whitespace-normal break-words">Деловой остаток ({advancedRemnantStats.orderRemTons.toFixed(3)} т × {formatCurrency(effectiveRemnantPrice)} руб/т){currentRemnantPricingRule === 'scrap' ? ' как лом' : ''}:</span>
+                                                <span className="text-right shrink-0">{formatCurrency(advancedRemnantStats.orderRemRevenue)} руб.</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                                )}
 
-                                    <div className="pt-4 sm:pt-5 mt-2 sm:mt-3 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
+                                <div className="pt-4 sm:pt-5 mt-2 sm:mt-3 border-t border-gray-700/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
                                         <div>
-                                        <span className="font-bold text-white text-[15px] sm:text-base uppercase tracking-wider block">Итоговая маржа без НДС:</span>
-                                        <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1.5 sm:mt-1 leading-relaxed pr-2">
+                                        <span className="font-bold text-white text-[15px] sm:text-base uppercase tracking-wider block whitespace-normal break-words">Итоговая маржа без НДС:</span>
+                                        <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1.5 sm:mt-1 leading-relaxed pr-2 whitespace-normal break-words">
                                             ({formatCurrency(commercialStats.sellTotal)} − {formatCurrency(commercialStats.rawTotal)} − {formatCurrency(commercialStats.lossesTotal)}{commercialStats.scrapRevenueTotal > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenueTotal)}` : ''})
                                         </div>
                                         </div>
@@ -1643,13 +1743,13 @@
                                     <Info className="w-5 h-5 sm:w-6 sm:h-6 text-[#d97706] mt-0.5 shrink-0" />
                                     <div>
                                         <h5 className="text-[#92400e] font-bold text-[13px] sm:text-[15px] mb-1 sm:mb-1.5">Рекомендация по цене</h5>
-                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-4">
+                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-4 whitespace-normal break-words">
                                         В себестоимость ложатся чистые потери от обрезков (с учетом продажи лома): <span className="font-bold text-[#92400e]">{formatCurrency(commercialStats.netLossesPerTon)} руб.</span> на каждую тонну продукции.
                                         </p>
-                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-3">
+                                        <p className="text-[#b45309] text-[11px] sm:text-[13px] leading-relaxed mb-2 sm:mb-3 whitespace-normal break-words">
                                         Рекомендуемая продажная цена (для компенсации чистых потерь):
                                         </p>
-                                        <div className="inline-block bg-white border border-[#fcd34d] px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-[#92400e] font-bold text-[14px] sm:text-lg shadow-sm">
+                                        <div className="inline-block bg-white border border-[#fcd34d] px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl text-[#92400e] font-bold text-[14px] sm:text-lg shadow-sm whitespace-normal break-words">
                                         {formatCurrency(Number(sellPrice) + Number(commercialStats.netLossesPerTon))} руб. / т
                                         </div>
                                     </div>
@@ -1663,7 +1763,7 @@
                                     <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-[#f87171] shrink-0 mt-0.5" />
                                     <div>
                                     <h5 className="text-[#fca5a5] font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Низкая маржинальность!</h5>
-                                    <p className="text-[#fecaca]/80 text-[11px] sm:text-[13px] leading-relaxed">
+                                    <p className="text-[#fecaca]/80 text-[11px] sm:text-[13px] leading-relaxed whitespace-normal break-words">
                                         Прибыль составляет менее 10 000 руб. на 1 тонну (текущая: {formatCurrency(commercialStats.profitPerTon)} руб., это {commercialStats.marginPercent.toFixed(1)}%). Рекомендуется повысить цену или оптимизировать длину раскроя.
                                     </p>
                                     </div>
@@ -1672,11 +1772,11 @@
                                 
                                 {/* Внимание: Убыток */}
                                 {commercialStats.profitPerTon <= 0 && currentAdminRawPrice && sellPrice && (
-                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2 sm:gap-4">
-                                    <AlertTriangle className="w-4 h-4 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
+                                <div className="bg-[#450a0a] border border-[#7f1d1d] p-3.5 sm:p-6 rounded-[16px] sm:rounded-[24px] flex items-start gap-2.5 sm:gap-4">
+                                    <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 shrink-0 mt-0.5" />
                                     <div>
-                                    <h5 className="text-red-300 font-bold text-[12px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
-                                    <p className="text-red-200/80 text-[10px] sm:text-[13px] leading-relaxed">
+                                    <h5 className="text-red-300 font-bold text-[13px] sm:text-[15px] mb-0.5 sm:mb-1">Сделка убыточна!</h5>
+                                    <p className="text-red-200/80 text-[11px] sm:text-[13px] leading-relaxed whitespace-normal break-words">
                                         Сделка приносит убыток. Пересмотрите цену продажи или согласуйте с клиентом оптимальную длину для устранения отходов.
                                     </p>
                                     </div>
