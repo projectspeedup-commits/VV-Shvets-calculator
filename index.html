@@ -303,9 +303,10 @@
         }
 
         // --- ПАНЕЛЬ АДМИНИСТРАТОРА ---
-        function AdminPanel({ initialRawPrices, initialScrap, onSave, onLogout, isCloudActive }) {
+        function AdminPanel({ initialRawPrices, initialScrap, initialRemnant, onSave, onLogout, isCloudActive }) {
             const [rawPrices, setRawPrices] = useState(initialRawPrices);
             const [scrap, setScrap] = useState(initialScrap);
+            const [remnant, setRemnant] = useState(initialRemnant);
             const [saved, setSaved] = useState(false);
             const [isSaving, setIsSaving] = useState(false);
             const [saveError, setSaveError] = useState('');
@@ -313,7 +314,8 @@
             useEffect(() => {
                 setRawPrices(initialRawPrices);
                 setScrap(initialScrap);
-            }, [initialRawPrices, initialScrap]);
+                setRemnant(initialRemnant);
+            }, [initialRawPrices, initialScrap, initialRemnant]);
 
             const handlePriceChange = (grade, value) => {
                 let val = value.replace(/\s/g, '').replace(/,/g, '.');
@@ -326,7 +328,7 @@
                 setIsSaving(true);
                 setSaveError('');
                 try {
-                    await onSave(rawPrices, scrap);
+                    await onSave(rawPrices, scrap, remnant);
                     setSaved(true);
                     setTimeout(() => setSaved(false), 3000);
                 } catch (e) {
@@ -376,17 +378,30 @@
                                 </div>
                             </div>
 
-                            {/* Цена лома */}
+                            {/* Цена лома и остатков */}
                             <div className="bg-[#F5F5F7]/80 p-5 rounded-2xl border border-gray-100/50">
-                                <div className="space-y-1.5 max-w-sm mx-auto">
-                                    <label className="block text-[13px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center mb-2">Единая цена лома (руб/тн)</label>
-                                    <div className="relative shadow-sm">
-                                        <input 
-                                            type="text" inputMode="decimal" placeholder="Например: 20000"
-                                            value={formatInputValue(scrap)} onChange={(e) => handleNumericInput(e, setScrap)} 
-                                            className="w-full bg-white border border-gray-100 text-gray-900 rounded-[16px] pl-4 pr-12 h-14 text-[15px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-center" 
-                                        />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">руб</span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center mb-2">Цена лома (руб/тн)</label>
+                                        <div className="relative shadow-sm">
+                                            <input 
+                                                type="text" inputMode="decimal" placeholder="Например: 20000"
+                                                value={formatInputValue(scrap)} onChange={(e) => handleNumericInput(e, setScrap)} 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[16px] pl-4 pr-12 h-14 text-[15px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-center" 
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">руб</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="block text-[12px] font-bold text-gray-800 ml-1 uppercase tracking-wider text-center mb-2">Цена делового остатка (руб/тн)</label>
+                                        <div className="relative shadow-sm">
+                                            <input 
+                                                type="text" inputMode="decimal" placeholder="Например: 35000"
+                                                value={formatInputValue(remnant)} onChange={(e) => handleNumericInput(e, setRemnant)} 
+                                                className="w-full bg-white border border-gray-100 text-gray-900 rounded-[16px] pl-4 pr-12 h-14 text-[15px] sm:text-base font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-center" 
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">руб</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -416,7 +431,7 @@
         }
 
         // --- ГЛАВНЫЙ КАЛЬКУЛЯТОР ---
-        function CalculatorApp({ adminRawPrices, adminScrapPrice, onLogout, isCloudActive }) {
+        function CalculatorApp({ adminRawPrices, adminScrapPrice, adminRemnantPrice, onLogout, isCloudActive }) {
             const [profileType, setProfileType] = useState('round');
             const [steelGrade, setSteelGrade] = useState('');
             const [selectedTarget, setSelectedTarget] = useState('');
@@ -621,11 +636,12 @@
                 return { tons: (weightKg / 1000).toFixed(5), kg: weightKg.toFixed(2) };
             }, [remnantLength, selectedTarget, profileType]);
 
+            // Стоимость остатка оценивается по Цене деловых остатков
             const remnantValue = useMemo(() => {
-                if (!remnantWeight || !currentAdminRawPrice) return null;
-                const val = Number(remnantWeight.tons) * Number(currentAdminRawPrice);
+                if (!remnantWeight || !adminRemnantPrice) return null;
+                const val = Number(remnantWeight.tons) * Number(adminRemnantPrice);
                 return isNaN(val) ? null : val.toFixed(2);
-            }, [remnantWeight, currentAdminRawPrice]);
+            }, [remnantWeight, adminRemnantPrice]);
 
             const advancedRemnantStats = useMemo(() => {
                 const hasRemnant = remnantLength && Number(remnantLength) > 0 && orderedLength && Number(orderedLength) > 0 && piecesPerBar > 0;
@@ -639,43 +655,48 @@
                 const remMm = hasRemnant ? Number(remnantLength) : 0;
                 const techMm = hasTechScrap ? Number(techEndsMm) : 0;
 
-                const totalScrapMm = remMm + techMm;
-                const totalRatio = totalScrapMm / productMm;
+                const remRatio = remMm / productMm;
+                const techRatio = techMm / productMm;
+                const totalRatio = remRatio + techRatio;
                 
                 const kgPerTon = totalRatio * 1000;
                 const tonsPerTon = totalRatio;
+                // Затраты на покупку всего этого отхода:
                 const valuePerTon = currentAdminRawPrice ? totalRatio * Number(currentAdminRawPrice) : null;
                 
-                let orderScrapTons = 0, orderScrapValue = null;
+                // Возврат: остатки по цене остатков + лом по цене лома
+                const revenuePerTon = (remRatio * Number(adminRemnantPrice || 0)) + (techRatio * Number(adminScrapPrice || 0));
+                
+                let orderScrapTons = 0, orderScrapValue = null, orderRevenue = 0;
                 
                 if (orderWeight && Number(orderWeight) > 0) {
                     orderScrapTons = totalRatio * Number(orderWeight);
                     if (currentAdminRawPrice) orderScrapValue = orderScrapTons * Number(currentAdminRawPrice);
+                    orderRevenue = revenuePerTon * Number(orderWeight);
                 }
                 
                 return {
                     kgPerTon: kgPerTon.toFixed(1), 
                     tonsPerTon: tonsPerTon.toFixed(3),
                     valuePerTon: valuePerTon !== null ? valuePerTon.toFixed(2) : null,
+                    revenuePerTon: revenuePerTon,
                     orderScrapTons: orderScrapTons.toFixed(3),
-                    orderScrapValue: orderScrapValue !== null ? orderScrapValue.toFixed(2) : null
+                    orderScrapValue: orderScrapValue !== null ? orderScrapValue.toFixed(2) : null,
+                    orderRevenue: orderRevenue
                 };
-            }, [remnantLength, orderedLength, currentAdminRawPrice, orderWeight, piecesPerBar, techEndsMm]);
+            }, [remnantLength, orderedLength, currentAdminRawPrice, adminScrapPrice, adminRemnantPrice, orderWeight, piecesPerBar, techEndsMm]);
 
             const commercialStats = useMemo(() => {
                 if (!sellPrice || !currentAdminRawPrice || !orderWeight) return null;
                 const sPrice = Number(sellPrice);
                 const rPrice = Number(currentAdminRawPrice);
-                const scPrice = Number(adminScrapPrice) || 0;
                 const weight = Number(orderWeight);
                 if (isNaN(sPrice) || isNaN(rPrice) || isNaN(weight)) return null;
 
                 const lossesPerTon = advancedRemnantStats && advancedRemnantStats.valuePerTon ? Number(advancedRemnantStats.valuePerTon) : 0;
-                const scrapTonsPerTon = advancedRemnantStats && advancedRemnantStats.tonsPerTon ? Number(advancedRemnantStats.tonsPerTon) : 0;
+                const scrapRevenuePerTon = advancedRemnantStats && advancedRemnantStats.revenuePerTon ? Number(advancedRemnantStats.revenuePerTon) : 0;
                 
-                const scrapRevenuePerTon = scrapTonsPerTon * scPrice;
                 const netLossesPerTon = lossesPerTon - scrapRevenuePerTon;
-
                 const profitPerTon = sPrice - rPrice - netLossesPerTon;
                 const profitTotal = profitPerTon * weight;
                 
@@ -692,11 +713,11 @@
                 sellTotalVat: sPrice * weight * 1.22,
                 rawTotal: rPrice * weight,
                 lossesTotal: lossesPerTon * weight,
-                scrapRevenueTotal: scrapRevenuePerTon * weight,
+                scrapRevenueTotal: advancedRemnantStats ? advancedRemnantStats.orderRevenue : 0,
                 netLossesTotal: netLossesPerTon * weight,
                 isPositive: profitTotal >= 0
                 };
-            }, [sellPrice, currentAdminRawPrice, adminScrapPrice, orderWeight, advancedRemnantStats]);
+            }, [sellPrice, currentAdminRawPrice, adminScrapPrice, adminRemnantPrice, orderWeight, advancedRemnantStats]);
 
             const formatCurrency = (value) => {
                 if (value === null || value === undefined || isNaN(Number(value))) return '0,00';
@@ -903,8 +924,7 @@
                             </button>
                         </div>
 
-                        {/* Изменена сетка: 3 колонки на ПК (lg), 2 колонки на планшетах (sm), 1 колонка на мобилках */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-end">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-end">
                             <div className="space-y-1.5">
                             <label className="block text-[12px] sm:text-[13px] font-medium text-gray-500 ml-1 leading-tight">Марка стали</label>
                             <div className="relative">
@@ -970,7 +990,7 @@
                             </div>
 
                             <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена заготовки за 1 тн {isCloudActive ? '(Заданная цена)' : ''}</label>
+                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена заготовки за 1 тн {isCloudActive ? '(Облако)' : ''}</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
@@ -983,11 +1003,23 @@
                             </div>
 
                             <div className="space-y-1.5">
-                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена лома за 1 т {isCloudActive ? '(Заданная цена)' : ''}</label>
+                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена лома за 1 т {isCloudActive ? '(Облако)' : ''}</label>
                             <div className="relative">
                                 <input 
                                 type="text" readOnly
                                 value={formatInputValue(adminScrapPrice)} 
+                                className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none cursor-default" 
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[13px] sm:text-sm">руб</span>
+                            </div>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                            <label className="block text-[12px] sm:text-[13px] font-bold text-gray-500 ml-1 leading-tight">Цена делового остатка за 1 т {isCloudActive ? '(Облако)' : ''}</label>
+                            <div className="relative">
+                                <input 
+                                type="text" readOnly
+                                value={formatInputValue(adminRemnantPrice)} 
                                 className="w-full bg-blue-50 border border-transparent text-blue-900 rounded-[16px] sm:rounded-2xl pl-4 pr-12 h-12 sm:h-14 text-[15px] sm:text-base font-semibold outline-none cursor-default" 
                                 />
                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 font-medium text-[13px] sm:text-sm">руб</span>
@@ -1158,9 +1190,9 @@
                                         {remnantWeight && <p className="text-green-600/80 font-medium text-[11px] sm:text-sm">~ {remnantWeight.tons} т ({remnantWeight.kg} кг)</p>}
                                     </div>
                                     </div>
-                                    {remnantValue && currentAdminRawPrice && (
+                                    {remnantValue && adminRemnantPrice && (
                                     <div className="bg-white/70 px-4 py-2.5 sm:px-5 sm:py-3 rounded-[12px] sm:rounded-[16px] w-full md:w-auto">
-                                        <span className="block text-[10px] sm:text-xs text-green-600 font-medium mb-0.5">Убыток на пруток</span>
+                                        <span className="block text-[10px] sm:text-xs text-green-600 font-medium mb-0.5">Оценочная стоимость остатка</span>
                                         <span className="text-[15px] sm:text-lg font-semibold text-green-800">{new Intl.NumberFormat('ru-RU').format(remnantValue)} руб.</span>
                                     </div>
                                     )}
@@ -1185,7 +1217,7 @@
                                 {advancedRemnantStats && (
                                     <>
                                     <div className="space-y-1 sm:space-y-1.5 lg:border-r border-green-200/50 lg:pr-4 pt-3 border-t lg:border-t-0 lg:pt-0">
-                                        <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Потери на производство 1 тонны готовой продукции</span>
+                                        <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Затраты на отходы (на 1 т продукции)</span>
                                         <div className="text-base sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
                                         {currentAdminRawPrice && advancedRemnantStats.valuePerTon !== null ? `${formatCurrency(advancedRemnantStats.valuePerTon)} руб.` : <span className="text-[12px] sm:text-[13px] text-green-600/60 font-normal">Укажите марку стали</span>}
                                         </div>
@@ -1197,7 +1229,7 @@
                                     </div>
 
                                     <div className="space-y-1 sm:space-y-1.5 pt-3 border-t border-green-200/50 lg:border-t-0 lg:pt-0">
-                                        <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Потери на весь заказ</span>
+                                        <span className="text-[11px] sm:text-xs text-green-600 font-medium block leading-tight">Затраты на отходы (весь заказ)</span>
                                         <div className="text-base sm:text-xl font-semibold text-green-800 tracking-tight mt-0.5 sm:mt-1">
                                         {currentAdminRawPrice && orderWeight && advancedRemnantStats.orderScrapValue !== null ? `${formatCurrency(advancedRemnantStats.orderScrapValue)} руб.` : <span className="text-[12px] sm:text-[13px] text-green-600/60 font-normal">Укажите вес и марку</span>}
                                         </div>
@@ -1295,9 +1327,7 @@
                         {commercialStats && (
                             <div className="bg-[#0f172a] text-white p-5 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl space-y-6 sm:space-y-8 print-shadow-none">
                             
-                            {/* Сетка для блоков расчета: в 1 колонку на мобилках, в 2 колонки на широких экранах */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
-                                
                                 {/* РАСЧЕТ НА 1 ТОННУ ПРОДУКЦИИ */}
                                 <div>
                                     <h4 className="text-blue-200/60 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3 sm:mb-5">Расчет на 1 тонну продукции</h4>
@@ -1311,12 +1341,12 @@
                                         <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(currentAdminRawPrice)} руб.` : '—'}</span>
                                     </div>
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Потери на производство 1 т:</span>
+                                        <span className="shrink-0">- Затраты на отходы (1 т):</span>
                                         <span className="text-right break-words">{currentAdminRawPrice ? `${formatCurrency(commercialStats.lossesPerTon)} руб.` : '—'}</span>
                                     </div>
-                                    {adminScrapPrice && Number(adminScrapPrice) > 0 && commercialStats.scrapRevenuePerTon > 0 && (
+                                    {commercialStats.scrapRevenuePerTon > 0 && (
                                     <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат лома (1 т):</span>
+                                        <span className="shrink-0">+ Возврат от лома и остатков:</span>
                                         <span className="text-right break-words">{formatCurrency(commercialStats.scrapRevenuePerTon)} руб.</span>
                                     </div>
                                     )}
@@ -1324,7 +1354,7 @@
                                         <div>
                                         <span className="font-bold text-white text-[14px] sm:text-[15px] block">Маржа (1 тн, без НДС):</span>
                                         <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 sm:mt-0.5 leading-relaxed pr-2">
-                                            ({formatCurrency(sellPrice)} − {formatCurrency(currentAdminRawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{adminScrapPrice && Number(adminScrapPrice) > 0 && commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
+                                            ({formatCurrency(sellPrice)} − {formatCurrency(currentAdminRawPrice)} − {formatCurrency(commercialStats.lossesPerTon)}{commercialStats.scrapRevenuePerTon > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenuePerTon)}` : ''})
                                         </div>
                                         </div>
                                         <div className="flex items-center gap-3 self-start sm:self-auto mt-1 sm:mt-0">
@@ -1352,12 +1382,12 @@
                                         <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.rawTotal)} руб.` : '—'}</span>
                                     </div>
                                     <div className="flex justify-between items-start sm:items-center text-[#fca5a5] gap-2">
-                                        <span className="shrink-0">- Потери на весь заказ:</span>
+                                        <span className="shrink-0">- Затраты на отходы (весь заказ):</span>
                                         <span className="text-right break-words">{currentAdminRawPrice && orderWeight ? `${formatCurrency(commercialStats.lossesTotal)} руб.` : '—'}</span>
                                     </div>
-                                    {adminScrapPrice && Number(adminScrapPrice) > 0 && commercialStats.scrapRevenueTotal > 0 && (
+                                    {commercialStats.scrapRevenueTotal > 0 && (
                                     <div className="flex justify-between items-start sm:items-center text-[#34d399] gap-2">
-                                        <span className="shrink-0">+ Возврат лома (весь заказ):</span>
+                                        <span className="shrink-0">+ Возврат от лома и остатков:</span>
                                         <span className="text-right break-words">{formatCurrency(commercialStats.scrapRevenueTotal)} руб.</span>
                                     </div>
                                     )}
@@ -1365,7 +1395,7 @@
                                         <div>
                                         <span className="font-bold text-white text-[15px] sm:text-base uppercase tracking-wider block">Итоговая маржа без НДС:</span>
                                         <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1.5 sm:mt-1 leading-relaxed pr-2">
-                                            ({formatCurrency(commercialStats.sellTotal)} − {formatCurrency(commercialStats.rawTotal)} − {formatCurrency(commercialStats.lossesTotal)}{adminScrapPrice && Number(adminScrapPrice) > 0 && commercialStats.scrapRevenueTotal > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenueTotal)}` : ''})
+                                            ({formatCurrency(commercialStats.sellTotal)} − {formatCurrency(commercialStats.rawTotal)} − {formatCurrency(commercialStats.lossesTotal)}{commercialStats.scrapRevenueTotal > 0 ? ` + ${formatCurrency(commercialStats.scrapRevenueTotal)}` : ''})
                                         </div>
                                         </div>
                                         <span className={`font-black text-2xl sm:text-3xl tracking-tight self-start sm:self-auto shrink-0 mt-1.5 sm:mt-0 ${commercialStats.isPositive ? 'text-[#34d399]' : 'text-[#f87171]'}`}>
@@ -1444,6 +1474,7 @@
             // Глобальные стейты цен
             const [globalRawPrices, setGlobalRawPrices] = useState(DEFAULT_RAW_PRICES);
             const [globalScrapPrice, setGlobalScrapPrice] = useState('20000');
+            const [globalRemnantPrice, setGlobalRemnantPrice] = useState('30000');
 
             // 1. Инициализация анонимной сессии
             useEffect(() => {
@@ -1472,6 +1503,8 @@
                 try {
                     const savedRaw = window.localStorage.getItem('arsenal_raw_prices');
                     const savedScrap = window.localStorage.getItem('arsenal_scrap_price');
+                    const savedRemnant = window.localStorage.getItem('arsenal_remnant_price');
+                    
                     if (savedRaw) {
                         const parsed = JSON.parse(savedRaw);
                         const loadedPrices = { ...DEFAULT_RAW_PRICES };
@@ -1481,6 +1514,7 @@
                         setGlobalRawPrices(loadedPrices);
                     }
                     if (savedScrap) setGlobalScrapPrice(savedScrap);
+                    if (savedRemnant) setGlobalRemnantPrice(savedRemnant);
                 } catch(e) {}
 
                 // Затем пытаемся загрузить актуальные данные из облака
@@ -1505,6 +1539,10 @@
                                 setGlobalScrapPrice(data.scrapPrice);
                                 window.localStorage.setItem('arsenal_scrap_price', data.scrapPrice);
                             }
+                            if (data.remnantPrice !== undefined) {
+                                setGlobalRemnantPrice(data.remnantPrice);
+                                window.localStorage.setItem('arsenal_remnant_price', data.remnantPrice);
+                            }
                         }
                     }, (error) => {
                         console.error("Ошибка чтения из облака:", error);
@@ -1514,14 +1552,16 @@
             }, [user]);
 
             // 3. Сохранение цен
-            const handleSaveGlobal = async (rawPricesObj, scrapStr) => {
+            const handleSaveGlobal = async (rawPricesObj, scrapStr, remnantStr) => {
                 setGlobalRawPrices(rawPricesObj);
                 setGlobalScrapPrice(scrapStr);
+                setGlobalRemnantPrice(remnantStr);
                 
                 // Всегда сохраняем в локальную память для отказоустойчивости
                 try {
                     window.localStorage.setItem('arsenal_raw_prices', JSON.stringify(rawPricesObj));
                     window.localStorage.setItem('arsenal_scrap_price', scrapStr);
+                    window.localStorage.setItem('arsenal_remnant_price', remnantStr);
                 } catch(e) {}
 
                 if (db && user && appId) {
@@ -1530,7 +1570,11 @@
                         firestoreRawPrices[sanitizeKey(k)] = v;
                     }
                     const pricesDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'prices');
-                    await setDoc(pricesDocRef, { rawPrices: firestoreRawPrices, scrapPrice: scrapStr }, { merge: true });
+                    await setDoc(pricesDocRef, { 
+                        rawPrices: firestoreRawPrices, 
+                        scrapPrice: scrapStr,
+                        remnantPrice: remnantStr
+                    }, { merge: true });
                 }
             };
 
@@ -1549,6 +1593,7 @@
                     <AdminPanel 
                         initialRawPrices={globalRawPrices} 
                         initialScrap={globalScrapPrice} 
+                        initialRemnant={globalRemnantPrice}
                         onSave={handleSaveGlobal} 
                         onLogout={() => setView('login')} 
                         isCloudActive={!!db}
@@ -1560,6 +1605,7 @@
                 <CalculatorApp 
                     adminRawPrices={globalRawPrices} 
                     adminScrapPrice={globalScrapPrice} 
+                    adminRemnantPrice={globalRemnantPrice}
                     onLogout={() => setView('login')} 
                     isCloudActive={!!db}
                 />
